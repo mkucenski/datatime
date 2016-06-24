@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//#define _DEBUG_ 1
+
 #include <iostream>
 #include <popt.h>
 #include <string>
@@ -42,11 +44,10 @@ int main(int argc, const char** argv) {
 	gregorian::date endDate(gregorian::max_date_time);
 
     // The retrieved entries are entered into the multimap using the time value as the 'key'. The multimap is automatically sorted based on those values; output is therefore sorted in ascending time order.
-    //multimap<posix_time::ptime, delimTextRow*> ptimeToRecordMap;
 	multimap<long, delimTextRow*> timeToRecordMap;
 
     // TODO I don't recall why it would be necessary to load all of the rows into a vector and then delete them all at the end...
-    vector<delimTextRow*> allRows;
+    //vector<delimTextRow*> allRows;
     
 	timeZoneCalculator tzcalc;
 	int iTrimData = -1;
@@ -108,7 +109,7 @@ int main(int argc, const char** argv) {
 				strTmp = poptGetOptArg(optCon);
 				if (strTmp.length() == 10) {
 					startDate = gregorian::from_string(strTmp);
-					DEBUG_INFO("mactime2 Start Date = " << startDate);
+					DEBUG_INFO(PACKAGE << " Start Date = " << startDate);
 				} else {
 					usage(optCon, "Invalid start date value", "e.g. yyyy-mm-dd");
 					exit(EXIT_FAILURE);
@@ -118,7 +119,7 @@ int main(int argc, const char** argv) {
 				strTmp = poptGetOptArg(optCon);
 				if (strTmp.length() == 10) {
 					endDate = gregorian::from_string(strTmp);
-					DEBUG_INFO("mactime2 End Date = " << endDate);
+					DEBUG_INFO(PACKAGE << " End Date = " << endDate);
 				} else {
 					usage(optCon, "Invalid end date value", "e.g., yyyy-mm-dd");
 					exit(EXIT_FAILURE);
@@ -158,7 +159,7 @@ int main(int argc, const char** argv) {
 			delimTextRow* pDelimRowObj = new delimTextRow;
 
             // TODO - Is this necessary?
-			allRows.push_back(pDelimRowObj);
+			//allRows.push_back(pDelimRowObj);
 			
 			long lMTime, lATime, lCTime;
 			if (delimFileObj.getNextRow(pDelimRowObj)) {				
@@ -169,7 +170,7 @@ int main(int argc, const char** argv) {
 				pDelimRowObj->getFieldAsLong(11, &lATime);
 				pDelimRowObj->getFieldAsLong(13, &lCTime);
 				
-				DEBUG_INFO("eventCorrelator Loading records, MTime = " << lMTime << ", ATime = " << lATime << ", CTime = " << lCTime);
+				DEBUG_INFO(PACKAGE << " Loading records, MTime = " << lMTime << ", ATime = " << lATime << ", CTime = " << lCTime);
 				if (lMTime == -1 && lATime == -1 && lCTime == -1) {	//If there are no valid dates, the row gets automatically added with -1
 					timeToRecordMap.insert(pair<long, delimTextRow*>(-1, pDelimRowObj));
 				} else {    //If there are valid dates, the row is subject to date range rules
@@ -260,7 +261,7 @@ int main(int argc, const char** argv) {
 		} else {
 			//TODO For non-delimited output, dynamically size rows based on maximum text width
 			
-			DEBUG_INFO("eventCorrelator it->first time value = " << it->first);
+			DEBUG_INFO(PACKAGE << " it->first time value = " << it->first);
 			if (it->first != lastTime) {								//Date-Time
 				cout.width(24);
 				cout << (it->first >= 0 ? getDateTimeString(tzcalc.calculateLocalTime(posix_time::from_time_t(it->first))) : "Unknown Date/Time") << " ";
@@ -292,10 +293,10 @@ int main(int argc, const char** argv) {
 	}	//for(multimap<long, string*>::iterator it = dateToRecordMap.begin(); it != dateToRecordMap.end(); it++) {
 
     // TODO - ?
-	for(vector<delimTextRow*>::iterator it = allRows.begin(); it != allRows.end(); it++) {
-		delete *it;
-	}
-	allRows.clear();
+	//for(vector<delimTextRow*>::iterator it = allRows.begin(); it != allRows.end(); it++) {
+	//	delete *it;
+	//}
+	//allRows.clear();
 
 	exit(rv);	
 }	//int main(int argc, const char** argv) {

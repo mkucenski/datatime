@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "C0E0C2CC44B4DFDCBEADE7B3A0873E09C87FCF16",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "C0E0C2CC44B4DFDCBEADE7B3A0873E09C87FCF16" : 0,
+    "D2D570E19231F75AD46A5109026C8282D98EB0A3" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "6A71BFD1-3AFB-498D-ACDF-EA6242E375D1",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "C0E0C2CC44B4DFDCBEADE7B3A0873E09C87FCF16" : "datatime\/",
+    "D2D570E19231F75AD46A5109026C8282D98EB0A3" : "misc\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "datatime",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "datatime.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:mkucenski\/datatime.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "C0E0C2CC44B4DFDCBEADE7B3A0873E09C87FCF16"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "github.com:mkucenski\/misc.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "D2D570E19231F75AD46A5109026C8282D98EB0A3"
+    }
+  ]
+}

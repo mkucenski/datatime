@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "9AE659981D1DCE660063EA69"
-               BuildableName = "eventCorrelator"
-               BlueprintName = "eventCorrelator"
-               ReferencedContainer = "container:eventCorrelator.xcodeproj">
+               BuildableName = "datatime"
+               BlueprintName = "datatime"
+               ReferencedContainer = "container:datatime.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -46,9 +46,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9AE659981D1DCE660063EA69"
-            BuildableName = "eventCorrelator"
-            BlueprintName = "eventCorrelator"
-            ReferencedContainer = "container:eventCorrelator.xcodeproj">
+            BuildableName = "datatime"
+            BlueprintName = "datatime"
+            ReferencedContainer = "container:datatime.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -64,9 +64,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "9AE659981D1DCE660063EA69"
-            BuildableName = "eventCorrelator"
-            BlueprintName = "eventCorrelator"
-            ReferencedContainer = "container:eventCorrelator.xcodeproj">
+            BuildableName = "datatime"
+            BlueprintName = "datatime"
+            ReferencedContainer = "container:datatime.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

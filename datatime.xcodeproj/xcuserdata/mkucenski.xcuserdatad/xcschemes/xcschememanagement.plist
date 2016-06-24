@@ -4,17 +4,7 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>bootstrap.xcscheme</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>2</integer>
-		</dict>
-		<key>eventCorrelator copy.xcscheme</key>
-		<dict>
-			<key>orderHint</key>
-			<integer>1</integer>
-		</dict>
-		<key>eventCorrelator.xcscheme</key>
+		<key>datatime.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>

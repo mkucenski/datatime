@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		9AE31DFB1D1DF8560059B07D /* debugMsgs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = debugMsgs.h; path = ../misc/debugMsgs.h; sourceTree = "<group>"; };
+		9AE31DFC1D1DF8560059B07D /* poptUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = poptUtils.h; path = ../misc/poptUtils.h; sourceTree = "<group>"; };
 		9AE6599E1D1DCEC80063EA69 /* configure.ac */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = configure.ac; sourceTree = "<group>"; };
 		9AE6599F1D1DCEC80063EA69 /* bootstrap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = bootstrap; sourceTree = "<group>"; };
 		9AE659A01D1DCEC80063EA69 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
@@ -17,6 +19,15 @@
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		9AE31DFD1D1DF85A0059B07D /* misc */ = {
+			isa = PBXGroup;
+			children = (
+				9AE31DFB1D1DF8560059B07D /* debugMsgs.h */,
+				9AE31DFC1D1DF8560059B07D /* poptUtils.h */,
+			);
+			name = misc;
+			sourceTree = "<group>";
+		};
 		9AE659931D1DCE660063EA69 = {
 			isa = PBXGroup;
 			children = (
@@ -25,6 +36,7 @@
 				9AE659A01D1DCEC80063EA69 /* LICENSE */,
 				9AE659A11D1DCEC80063EA69 /* Makefile.am */,
 				9AE659A21D1DCEC80063EA69 /* README.md */,
+				9AE31DFD1D1DF85A0059B07D /* misc */,
 				9AE659A51D1DCFE60063EA69 /* src */,
 			);
 			sourceTree = "<group>";
@@ -41,17 +53,17 @@
 /* End PBXGroup section */
 
 /* Begin PBXLegacyTarget section */
-		9AE659981D1DCE660063EA69 /* datetime */ = {
+		9AE659981D1DCE660063EA69 /* datatime */ = {
 			isa = PBXLegacyTarget;
 			buildArgumentsString = "$(ACTION)";
-			buildConfigurationList = 9AE6599B1D1DCE660063EA69 /* Build configuration list for PBXLegacyTarget "datetime" */;
+			buildConfigurationList = 9AE6599B1D1DCE660063EA69 /* Build configuration list for PBXLegacyTarget "datatime" */;
 			buildPhases = (
 			);
 			buildToolPath = /usr/bin/make;
 			buildWorkingDirectory = "";
 			dependencies = (
 			);
-			name = datetime;
+			name = datatime;
 			passBuildSettingsInEnvironment = 1;
 			productName = eventCorrelator;
 		};
@@ -80,7 +92,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				9AE659981D1DCE660063EA69 /* datetime */,
+				9AE659981D1DCE660063EA69 /* datatime */,
 			);
 		};
 /* End PBXProject section */
@@ -194,7 +206,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9AE6599B1D1DCE660063EA69 /* Build configuration list for PBXLegacyTarget "datetime" */ = {
+		9AE6599B1D1DCE660063EA69 /* Build configuration list for PBXLegacyTarget "datatime" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9AE6599C1D1DCE660063EA69 /* Debug */,
