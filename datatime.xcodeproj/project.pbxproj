@@ -13,7 +13,7 @@
 		9AE659A11D1DCEC80063EA69 /* Makefile.am */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Makefile.am; sourceTree = "<group>"; };
 		9AE659A21D1DCEC80063EA69 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		9AE659A31D1DCEC80063EA69 /* Makefile.am */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile.am; path = src/Makefile.am; sourceTree = "<group>"; };
-		9AE659A41D1DCEC80063EA69 /* eventCorrelator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = eventCorrelator.cpp; path = src/eventCorrelator.cpp; sourceTree = "<group>"; };
+		9AE659A41D1DCEC80063EA69 /* datatime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = datatime.cpp; path = src/datatime.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -25,7 +25,6 @@
 				9AE659A01D1DCEC80063EA69 /* LICENSE */,
 				9AE659A11D1DCEC80063EA69 /* Makefile.am */,
 				9AE659A21D1DCEC80063EA69 /* README.md */,
-				9AE659A31D1DCEC80063EA69 /* Makefile.am */,
 				9AE659A51D1DCFE60063EA69 /* src */,
 			);
 			sourceTree = "<group>";
@@ -33,7 +32,8 @@
 		9AE659A51D1DCFE60063EA69 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				9AE659A41D1DCEC80063EA69 /* eventCorrelator.cpp */,
+				9AE659A31D1DCEC80063EA69 /* Makefile.am */,
+				9AE659A41D1DCEC80063EA69 /* datatime.cpp */,
 			);
 			name = src;
 			sourceTree = "<group>";
@@ -69,7 +69,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 9AE659971D1DCE660063EA69 /* Build configuration list for PBXProject "eventCorrelator" */;
+			buildConfigurationList = 9AE659971D1DCE660063EA69 /* Build configuration list for PBXProject "datatime" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -185,7 +185,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		9AE659971D1DCE660063EA69 /* Build configuration list for PBXProject "eventCorrelator" */ = {
+		9AE659971D1DCE660063EA69 /* Build configuration list for PBXProject "datatime" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9AE659991D1DCE660063EA69 /* Debug */,

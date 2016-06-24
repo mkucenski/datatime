@@ -40,9 +40,14 @@ int main(int argc, const char** argv) {
 	bool bAllFields = false;
 	gregorian::date startDate(gregorian::min_date_time);
 	gregorian::date endDate(gregorian::max_date_time);
-	//multimap<posix_time::ptime, delimTextRow*> ptimeToRecordMap;
+
+    // The retrieved entries are entered into the multimap using the time value as the 'key'. The multimap is automatically sorted based on those values; output is therefore sorted in ascending time order.
+    //multimap<posix_time::ptime, delimTextRow*> ptimeToRecordMap;
 	multimap<long, delimTextRow*> timeToRecordMap;
-	vector<delimTextRow*> allRows;
+
+    // TODO I don't recall why it would be necessary to load all of the rows into a vector and then delete them all at the end...
+    vector<delimTextRow*> allRows;
+    
 	timeZoneCalculator tzcalc;
 	int iTrimData = -1;
 	
@@ -134,6 +139,7 @@ int main(int argc, const char** argv) {
 		exit(EXIT_FAILURE);
 	}
 
+    // Read all of the remainging arguments as "body" filenames.
 	const char* cstrFilename = poptGetArg(optCon);
 	while (cstrFilename) {
 		filenameVector.push_back(cstrFilename);
@@ -144,11 +150,14 @@ int main(int argc, const char** argv) {
 		filenameVector.push_back("");		//If no files are given, an empty filename will cause libDelimFile to read from stdin
 	}
 	
+    // For each filename, open a delimTextFile object and iterate through the rows.
 	for (vector<string>::iterator it = filenameVector.begin(); it != filenameVector.end(); it++) {
 		delimTextFile delimFileObj(*it, chDelim, chQualifier);
 		
 		while (true) {
 			delimTextRow* pDelimRowObj = new delimTextRow;
+
+            // TODO - Is this necessary?
 			allRows.push_back(pDelimRowObj);
 			
 			long lMTime, lATime, lCTime;
@@ -160,23 +169,23 @@ int main(int argc, const char** argv) {
 				pDelimRowObj->getFieldAsLong(11, &lATime);
 				pDelimRowObj->getFieldAsLong(13, &lCTime);
 				
-				DEBUG_INFO("mactime2 Loading records, MTime = " << lMTime << ", ATime = " << lATime << ", CTime = " << lCTime);
+				DEBUG_INFO("eventCorrelator Loading records, MTime = " << lMTime << ", ATime = " << lATime << ", CTime = " << lCTime);
 				if (lMTime == -1 && lATime == -1 && lCTime == -1) {	//If there are no valid dates, the row gets automatically added with -1
 					timeToRecordMap.insert(pair<long, delimTextRow*>(-1, pDelimRowObj));
-				} else {																//If there are valid dates, the row is subject to date range rules
+				} else {    //If there are valid dates, the row is subject to date range rules
 					if (lMTime >= 0) {
 						if (dateRange.contains(tzcalc.calculateLocalTime(posix_time::from_time_t(lMTime)).local_time().date())) {
 							timeToRecordMap.insert(pair<long, delimTextRow*>(lMTime, pDelimRowObj));
 						}
 					}
 					
-					if (lATime >= 0 && lATime != lMTime) {								//Only add a row more than once if the various times are different from each other.
+					if (lATime >= 0 && lATime != lMTime) {  //Only add a row more than once if the various times are different from each other.
 						if (dateRange.contains(tzcalc.calculateLocalTime(posix_time::from_time_t(lATime)).local_time().date())) {
 							timeToRecordMap.insert(pair<long, delimTextRow*>(lATime, pDelimRowObj));
 						}
 					}
 										
-					if (lCTime >= 0 && lCTime != lMTime && lCTime != lATime) {	//Only add a row more than once if the various times are different from each other.
+					if (lCTime >= 0 && lCTime != lMTime && lCTime != lATime) {  //Only add a row more than once if the various times are different from each other.
 						if (dateRange.contains(tzcalc.calculateLocalTime(posix_time::from_time_t(lCTime)).local_time().date())) {
 							timeToRecordMap.insert(pair<long, delimTextRow*>(lCTime, pDelimRowObj));
 						}
@@ -251,29 +260,29 @@ int main(int argc, const char** argv) {
 		} else {
 			//TODO For non-delimited output, dynamically size rows based on maximum text width
 			
-			DEBUG_INFO("mactime2 it->first time value = " << it->first);
+			DEBUG_INFO("eventCorrelator it->first time value = " << it->first);
 			if (it->first != lastTime) {								//Date-Time
 				cout.width(24);
 				cout << (it->first >= 0 ? getDateTimeString(tzcalc.calculateLocalTime(posix_time::from_time_t(it->first))) : "Unknown Date/Time") << " ";
 				lastTime = it->first;
-			} else {		//Don't repeat the same date over and over
+			} else {    //Don't repeat the same date over and over
 				cout.width(24);
 				cout << " " << " ";
 			}
 			cout.width(3);
-			cout << strFields[0] << " ";								//Type (i.e. EVT,LNK,FWL,etc)
+			cout << strFields[0] << " ";    //Type (i.e. EVT,LNK,FWL,etc)
 			cout.width(15);
-			cout << strFields[10] << " ";                               //Size
+			cout << strFields[10] << " ";   //Size
 			cout << (lMTime == it->first ? 'm' : '.') << (lATime == it->first ? 'a' : '.') << (lCTime == it->first ? 'c' : '.') << " ";
 			cout.width(15);
-			cout << strFields[5] << " ";								//Permissions
+			cout << strFields[5] << " ";    //Permissions
 			cout.width(15);
-			cout << strFields[7] << " ";								//UID
+			cout << strFields[7] << " ";    //UID
 			cout.width(15);
-			cout << strFields[8] << " ";								//GID
+			cout << strFields[8] << " ";    //GID
 			cout.width(15);
-			cout << strFields[3] << " ";								//INODE
-			if (iTrimData >= 0) {										//FILE
+			cout << strFields[3] << " ";    //INODE
+			if (iTrimData >= 0) {           //FILE
 				cout << string(strFields[1], 0, iTrimData);
 			} else {
 				cout << strFields[1];
@@ -281,7 +290,8 @@ int main(int argc, const char** argv) {
 			cout << "\n";
 		}	//if (bDelimited) {
 	}	//for(multimap<long, string*>::iterator it = dateToRecordMap.begin(); it != dateToRecordMap.end(); it++) {
-	
+
+    // TODO - ?
 	for(vector<delimTextRow*>::iterator it = allRows.begin(); it != allRows.end(); it++) {
 		delete *it;
 	}
