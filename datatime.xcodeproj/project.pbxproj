@@ -41,17 +41,17 @@
 /* End PBXGroup section */
 
 /* Begin PBXLegacyTarget section */
-		9AE659981D1DCE660063EA69 /* eventCorrelator */ = {
+		9AE659981D1DCE660063EA69 /* datetime */ = {
 			isa = PBXLegacyTarget;
 			buildArgumentsString = "$(ACTION)";
-			buildConfigurationList = 9AE6599B1D1DCE660063EA69 /* Build configuration list for PBXLegacyTarget "eventCorrelator" */;
+			buildConfigurationList = 9AE6599B1D1DCE660063EA69 /* Build configuration list for PBXLegacyTarget "datetime" */;
 			buildPhases = (
 			);
 			buildToolPath = /usr/bin/make;
 			buildWorkingDirectory = "";
 			dependencies = (
 			);
-			name = eventCorrelator;
+			name = datetime;
 			passBuildSettingsInEnvironment = 1;
 			productName = eventCorrelator;
 		};
@@ -80,7 +80,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				9AE659981D1DCE660063EA69 /* eventCorrelator */,
+				9AE659981D1DCE660063EA69 /* datetime */,
 			);
 		};
 /* End PBXProject section */
@@ -194,7 +194,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		9AE6599B1D1DCE660063EA69 /* Build configuration list for PBXLegacyTarget "eventCorrelator" */ = {
+		9AE6599B1D1DCE660063EA69 /* Build configuration list for PBXLegacyTarget "datetime" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				9AE6599C1D1DCE660063EA69 /* Debug */,

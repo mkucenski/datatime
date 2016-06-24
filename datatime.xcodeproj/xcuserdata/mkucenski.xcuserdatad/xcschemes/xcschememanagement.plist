@@ -4,6 +4,16 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>bootstrap.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
+		<key>eventCorrelator copy.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 		<key>eventCorrelator.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -12,6 +22,16 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
+		<key>9AE31DF31D1DF4C90059B07D</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>9AE31DF71D1DF5690059B07D</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
 		<key>9AE659981D1DCE660063EA69</key>
 		<dict>
 			<key>primary</key>
