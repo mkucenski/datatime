@@ -1,7 +1,7 @@
 # eventCorrelator
 A recreation of of The SleuthKit's 'mactime' with a goal of allowing integration of timeline data from other sources (EVT, LNK, Firewall, etc.)
 
-# License
+## License
 <p>Copyright &copy; 2016 Matthew A. Kucenski</p>
 
 <p>Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.</p>
 
-
+## Description
 //Sleuthkit TSK3.x body format - TODO - Not yet adjusted and implemented...
 //0  |1   |2    |3          |4  |5  |6   |7    |8    |9    |10    |11     |12     |13       |14     |15
 //MD5|NAME|INODE|PERMISSIONS|UID|GID|SIZE|ATIME|MTIME|CTIME|CRTIME
