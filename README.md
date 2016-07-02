@@ -23,7 +23,7 @@ Description
 
 The goal of this project was/is to use TSK's body format to integrate timeline data from other sources such as firewall logs, log records, shortcut files, network data (PCAP), etc. to focus and visualize combined events to understand what was happening at a specific time.
 
-As you can see from the [formatting notes](#formatting-notes).
+As you can see from the [formatting notes](#formatting-notes), I'm really just "shoehorning" other text data records to line up as best as possible with the TSK conventions. Obviously, not all of the TSK filesystem concepts make sense for other types of data.
 
 While I'm not convinced the TSK "body" format is really the best or most flexible format to use for this application, it provided an easy and acceptable solution at the time I wrote it.
 
@@ -31,6 +31,7 @@ Another goal of this project was to increase the speed of sorting/processing the
 
 Formatting Notes
 ----------------
+```
 //Sleuthkit TSK3.x body format - TODO - Not yet adjusted and implemented...
 //0  |1   |2    |3          |4  |5  |6   |7    |8    |9    |10    |11     |12     |13       |14     |15
 //MD5|NAME|INODE|PERMISSIONS|UID|GID|SIZE|ATIME|MTIME|CTIME|CRTIME
@@ -51,4 +52,5 @@ Formatting Notes
 
 //Mactime for lnk files
 //LNK|SHORTCUT |      |     |        |        |     |   |   |     |SIZE|ATIME|MTIME  |CTIME
+```
 
