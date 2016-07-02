@@ -23,13 +23,14 @@ Description
 
 The goal of this project was/is to use TSK's body format to integrate timeline data from other sources such as firewall logs, log records, shortcut files, network data (PCAP), etc. to focus and visualize combined events to understand what was happening at a specific time.
 
-As you can see from the [formatting notes](#Formatting Notes).
+As you can see from the [formatting notes](#formatting-notes).
 
 While I'm not convinced the TSK "body" format is really the best or most flexible format to use for this application, it provided an easy and acceptable solution at the time I wrote it.
 
 Another goal of this project was to increase the speed of sorting/processing the records and providing usable results to the analyst. It has been many years since I conducted any tests, but as I recall this application was able to process records *much* faster--a requirement when you start adding massive amounts of firewall, network, and other data on top of already vast filesystem records.
 
-### Formatting Notes
+Formatting Notes
+----------------
 //Sleuthkit TSK3.x body format - TODO - Not yet adjusted and implemented...
 //0  |1   |2    |3          |4  |5  |6   |7    |8    |9    |10    |11     |12     |13       |14     |15
 //MD5|NAME|INODE|PERMISSIONS|UID|GID|SIZE|ATIME|MTIME|CTIME|CRTIME
