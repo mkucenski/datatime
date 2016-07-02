@@ -1,4 +1,5 @@
-# datatime
+datatime
+========
 A recreation of of The SleuthKit's 'mactime' with a goal of faster results and allowing integration of timeline data from other sources (EVT, LNK, Firewall, etc.). 
 
 ## License
