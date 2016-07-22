@@ -33,6 +33,7 @@ Dependencies
 ------------
 * [popt](http://www.freecode.com/projects/popt/)
 * [Boost Date-Time](http://www.boost.org)
+* [autoconf-archive](https://savannah.gnu.org/projects/autoconf-archive/)
 * [My libdelimText](https://github.com/mkucenski/libdelimText)
 * [My libtimeUtils](https://github.com/mkucenski/libtimeUtils)
 
