@@ -176,8 +176,8 @@ int main(int argc, const char** argv) {
 				pDelimRowObj->getFieldAsLong(TSK3_MACTIME_CTIME, &lCTime);
 				pDelimRowObj->getFieldAsLong(TSK3_MACTIME_CRTIME, &lCRTime);
 				
-				DEBUG_INFO(PACKAGE << ": Loading records, MTime = " << lMTime << ", ATime = " << lATime << ", CTime = " << lCTime);
-				if (lMTime == -1 && lATime == -1 && lCTime == -1) {	//If there are no valid dates, the row gets automatically added with -1
+				DEBUG_INFO(PACKAGE << ": Loading records, MTime = " << lMTime << ", ATime = " << lATime << ", CTime = " << lCTime << ", CRTime = " << lCRTime);
+				if (lMTime == -1 && lATime == -1 && lCTime == -1 && lCRTime == -1) {	//If there are no valid dates, the row gets automatically added with -1
 					timeToRecordMap.insert(pair<long, delimTextRow*>(-1, pDelimRowObj));
 				} else {    //If there are valid dates, the row is subject to date range rules
 					if (lMTime >= 0) {
@@ -195,6 +195,12 @@ int main(int argc, const char** argv) {
 					if (lCTime >= 0 && lCTime != lMTime && lCTime != lATime) {  //Only add a row more than once if the various times are different from each other.
 						if (dateRange.contains(tzcalc.calculateLocalTime(posix_time::from_time_t(lCTime)).local_time().date())) {
 							timeToRecordMap.insert(pair<long, delimTextRow*>(lCTime, pDelimRowObj));
+						}
+					}
+										
+					if (lCRTime >= 0 && lCRTime != lMTime && lCRTime != lATime && lCRTime != lCTime) {  //Only add a row more than once if the various times are different from each other.
+						if (dateRange.contains(tzcalc.calculateLocalTime(posix_time::from_time_t(lCRTime)).local_time().date())) {
+							timeToRecordMap.insert(pair<long, delimTextRow*>(lCRTime, pDelimRowObj));
 						}
 					}
 				}
@@ -220,22 +226,19 @@ int main(int argc, const char** argv) {
 		it->second->getFieldAsLong(TSK3_MACTIME_CRTIME, &lCRTime);
 		
 		string strFields[11];
-		if ( !(it->second->getField(TSK3_MACTIME_MD5, &strFields[TSK3_MACTIME_MD5]) &&
-			it->second->getField(TSK3_MACTIME_SIZE, &strFields[TSK3_MACTIME_SIZE]) &&
-			it->second->getField(TSK3_MACTIME_PERMS, &strFields[TSK3_MACTIME_PERMS]) &&
-			it->second->getField(TSK3_MACTIME_UID, &strFields[TSK3_MACTIME_UID]) &&
-			it->second->getField(TSK3_MACTIME_GID, &strFields[TSK3_MACTIME_GID]) &&
-			it->second->getField(TSK3_MACTIME_INODE, &strFields[TSK3_MACTIME_INODE]) &&
-			it->second->getField(TSK3_MACTIME_NAME, &strFields[TSK3_MACTIME_NAME]))) {
+		it->second->getField(TSK3_MACTIME_NAME, &strFields[TSK3_MACTIME_NAME]);
+		it->second->getField(TSK3_MACTIME_MD5, &strFields[TSK3_MACTIME_MD5]);
+		it->second->getField(TSK3_MACTIME_SIZE, &strFields[TSK3_MACTIME_SIZE]);
+		it->second->getField(TSK3_MACTIME_PERMS, &strFields[TSK3_MACTIME_PERMS]);
+		it->second->getField(TSK3_MACTIME_UID, &strFields[TSK3_MACTIME_UID]);
+		it->second->getField(TSK3_MACTIME_GID, &strFields[TSK3_MACTIME_GID]);
+		it->second->getField(TSK3_MACTIME_INODE, &strFields[TSK3_MACTIME_INODE]);
 
-			cerr << "ERROR: Unable to retrieve base field values.\n";
-		}
-			
 		if (bDelimited) {
 			cout 	<< (it->first >= 0 ? getDateTimeString(tzcalc.calculateLocalTime(posix_time::from_time_t(it->first))) : "Unknown") << ","
 					<< strFields[TSK3_MACTIME_MD5] << ","
 					<< strFields[TSK3_MACTIME_SIZE] << ","
-					<< (lMTime == it->first ? 'm' : '.') << (lATime == it->first ? 'a' : '.') << (lCTime == it->first ? 'c' : '.') << ","
+					<< (lMTime == it->first ? 'm' : '.') << (lATime == it->first ? 'a' : '.') << (lCTime == it->first ? 'c' : '.') << (lCRTime == it->first ? 'b' : '.') << ","
 					<< strFields[TSK3_MACTIME_PERMS] << ","
 					<< strFields[TSK3_MACTIME_UID] << ","
 					<< strFields[TSK3_MACTIME_GID] << ","
@@ -280,7 +283,7 @@ int main(int argc, const char** argv) {
 			cout << strFields[TSK3_MACTIME_GID];
 			cout << " ";
 
-			cout.width(12);
+			cout.width(8);
 			cout << strFields[TSK3_MACTIME_INODE];
 			cout << " ";
 
