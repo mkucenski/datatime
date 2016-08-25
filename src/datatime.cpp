@@ -283,7 +283,7 @@ int main(int argc, const char** argv) {
 			cout << strFields[TSK3_MACTIME_GID];
 			cout << " ";
 
-			cout.width(8);
+			cout.width(12);
 			cout << strFields[TSK3_MACTIME_INODE];
 			cout << " ";
 
