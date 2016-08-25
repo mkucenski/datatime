@@ -31,6 +31,7 @@ using namespace boost;
 #include "libtimeUtils/src/timeZoneCalculator.h"
 #include "misc/debugMsgs.h"
 #include "misc/poptUtils.h"
+#include "misc/tsk3_mactime.h"
 
 int main(int argc, const char** argv) {
 	int rv = EXIT_FAILURE;
@@ -109,7 +110,7 @@ int main(int argc, const char** argv) {
 				strTmp = poptGetOptArg(optCon);
 				if (strTmp.length() == 10) {
 					startDate = gregorian::from_string(strTmp);
-					DEBUG_INFO(PACKAGE << " Start Date = " << startDate);
+					DEBUG_INFO(PACKAGE << ": Start Date = " << startDate);
 				} else {
 					usage(optCon, "Invalid start date value", "e.g. yyyy-mm-dd");
 					exit(EXIT_FAILURE);
@@ -119,7 +120,7 @@ int main(int argc, const char** argv) {
 				strTmp = poptGetOptArg(optCon);
 				if (strTmp.length() == 10) {
 					endDate = gregorian::from_string(strTmp);
-					DEBUG_INFO(PACKAGE << " End Date = " << endDate);
+					DEBUG_INFO(PACKAGE << ": End Date = " << endDate);
 				} else {
 					usage(optCon, "Invalid end date value", "e.g., yyyy-mm-dd");
 					exit(EXIT_FAILURE);
@@ -153,24 +154,29 @@ int main(int argc, const char** argv) {
 	
     // For each filename, open a delimTextFile object and iterate through the rows.
 	for (vector<string>::iterator it = filenameVector.begin(); it != filenameVector.end(); it++) {
+		DEBUG_INFO(PACKAGE << ": Reading file: " << *it);
 		delimTextFile delimFileObj(*it, chDelim, chQualifier);
 		
 		while (true) {
 			delimTextRow* pDelimRowObj = new delimTextRow;
 
-            // TODO - Is this necessary?
+			// TODO - Is this necessary?
 			//allRows.push_back(pDelimRowObj);
 			
-			long lMTime, lATime, lCTime;
+			long lMTime, lATime, lCTime, lCRTime;
 			if (delimFileObj.getNextRow(pDelimRowObj)) {				
+				DEBUG_INFO(PACKAGE << ": Retrieved Row: " << pDelimRowObj->getField(TSK3_MACTIME_NAME));
+
 				lMTime = -1;
 				lATime = -1;
 				lCTime = -1;
-				pDelimRowObj->getFieldAsLong(12, &lMTime);
-				pDelimRowObj->getFieldAsLong(11, &lATime);
-				pDelimRowObj->getFieldAsLong(13, &lCTime);
+				lCRTime = -1;
+				pDelimRowObj->getFieldAsLong(TSK3_MACTIME_MTIME, &lMTime);
+				pDelimRowObj->getFieldAsLong(TSK3_MACTIME_ATIME, &lATime);
+				pDelimRowObj->getFieldAsLong(TSK3_MACTIME_CTIME, &lCTime);
+				pDelimRowObj->getFieldAsLong(TSK3_MACTIME_CRTIME, &lCRTime);
 				
-				DEBUG_INFO(PACKAGE << " Loading records, MTime = " << lMTime << ", ATime = " << lATime << ", CTime = " << lCTime);
+				DEBUG_INFO(PACKAGE << ": Loading records, MTime = " << lMTime << ", ATime = " << lATime << ", CTime = " << lCTime);
 				if (lMTime == -1 && lATime == -1 && lCTime == -1) {	//If there are no valid dates, the row gets automatically added with -1
 					timeToRecordMap.insert(pair<long, delimTextRow*>(-1, pDelimRowObj));
 				} else {    //If there are valid dates, the row is subject to date range rules
@@ -201,94 +207,90 @@ int main(int argc, const char** argv) {
 	cout << "Time Zone: \"" << tzcalc.getTimeZoneString() << "\"" << endl;		//Display the timezone so that the reader knows which zone was used for this output
 		
 	long lastTime = -1;
-	long lMTime, lATime, lCTime;
+	long lMTime, lATime, lCTime, lCRTime;
 	for(multimap<long, delimTextRow*>::iterator it = timeToRecordMap.begin(); it != timeToRecordMap.end(); it++) {
 		lMTime = -1;
 		lATime = -1;
 		lCTime = -1;
-		it->second->getFieldAsLong(12, &lMTime);
-		it->second->getFieldAsLong(11, &lATime);
-		it->second->getFieldAsLong(13, &lCTime);
+		lCRTime = -1;
+
+		it->second->getFieldAsLong(TSK3_MACTIME_MTIME, &lMTime);
+		it->second->getFieldAsLong(TSK3_MACTIME_ATIME, &lATime);
+		it->second->getFieldAsLong(TSK3_MACTIME_CTIME, &lCTime);
+		it->second->getFieldAsLong(TSK3_MACTIME_CRTIME, &lCRTime);
 		
 		string strFields[11];
-		if (it->second->getField(0, &strFields[0]) &&
-			it->second->getField(10, &strFields[10]) &&
-			it->second->getField(5, &strFields[5]) &&
-			it->second->getField(7, &strFields[7]) &&	//uid
-			it->second->getField(8, &strFields[8]) &&	//gid
-			it->second->getField(3, &strFields[3]) &&
-			it->second->getField(1, &strFields[1])) {
-				
-			if (bDelimited && bAllFields) {
-				if (it->second->getField(2, &strFields[2]) &&
-					it->second->getField(4, &strFields[4]) &&
-					it->second->getField(6, &strFields[6]) &&
-					it->second->getField(9, &strFields[9])) {
-				} else {
-					cerr << "ERROR: Unable to retrieve additional field values.\n";
-				}
-			}
-		} else {
+		if ( !(it->second->getField(TSK3_MACTIME_MD5, &strFields[TSK3_MACTIME_MD5]) &&
+			it->second->getField(TSK3_MACTIME_SIZE, &strFields[TSK3_MACTIME_SIZE]) &&
+			it->second->getField(TSK3_MACTIME_PERMS, &strFields[TSK3_MACTIME_PERMS]) &&
+			it->second->getField(TSK3_MACTIME_UID, &strFields[TSK3_MACTIME_UID]) &&
+			it->second->getField(TSK3_MACTIME_GID, &strFields[TSK3_MACTIME_GID]) &&
+			it->second->getField(TSK3_MACTIME_INODE, &strFields[TSK3_MACTIME_INODE]) &&
+			it->second->getField(TSK3_MACTIME_NAME, &strFields[TSK3_MACTIME_NAME]))) {
+
 			cerr << "ERROR: Unable to retrieve base field values.\n";
 		}
 			
 		if (bDelimited) {
 			cout 	<< (it->first >= 0 ? getDateTimeString(tzcalc.calculateLocalTime(posix_time::from_time_t(it->first))) : "Unknown") << ","
-					<< strFields[0] << ","
-					<< strFields[10] << ","
+					<< strFields[TSK3_MACTIME_MD5] << ","
+					<< strFields[TSK3_MACTIME_SIZE] << ","
 					<< (lMTime == it->first ? 'm' : '.') << (lATime == it->first ? 'a' : '.') << (lCTime == it->first ? 'c' : '.') << ","
-					<< strFields[5] << ","
-					<< strFields[7] << ","
-					<< strFields[8] << ","
-					<< strFields[3] << ","
-					<< strFields[1];
-
-			if (bAllFields == true) {
-				cout 	<< "," << strFields[2]
-						<< "," << strFields[4]
-						<< "," << strFields[6]
-						<< "," << strFields[9];
-
-				string strField;
-				unsigned int field = 14;
-				while (it->second->getField(field, &strField)) {
-					cout << "," << strField;
-					field++;
-				}				
-			}	//if (bAllFields == true) {
-								
-			cout << "\n";
+					<< strFields[TSK3_MACTIME_PERMS] << ","
+					<< strFields[TSK3_MACTIME_UID] << ","
+					<< strFields[TSK3_MACTIME_GID] << ","
+					<< strFields[TSK3_MACTIME_INODE] << ","
+					<< strFields[TSK3_MACTIME_NAME]
+					<< "\n";
 		} else {
 			//TODO For non-delimited output, dynamically size rows based on maximum text width
-			
-			DEBUG_INFO(PACKAGE << " it->first time value = " << it->first);
+			DEBUG_INFO(PACKAGE << ": it->first time value = " << it->first);
+			//cout.fill('_');
+
 			if (it->first != lastTime) {								//Date-Time
 				cout.width(24);
-				cout << (it->first >= 0 ? getDateTimeString(tzcalc.calculateLocalTime(posix_time::from_time_t(it->first))) : "Unknown Date/Time") << " ";
+				cout << (it->first >= 0 ? getDateTimeString(tzcalc.calculateLocalTime(posix_time::from_time_t(it->first))) : "Unknown Date/Time");
 				lastTime = it->first;
 			} else {    //Don't repeat the same date over and over
 				cout.width(24);
-				cout << " " << " ";
+				cout << "";
 			}
-			cout.width(3);
-			cout << strFields[0] << " ";    //Type (i.e. EVT,LNK,FWL,etc)
-			cout.width(15);
-			cout << strFields[10] << " ";   //Size
-			cout << (lMTime == it->first ? 'm' : '.') << (lATime == it->first ? 'a' : '.') << (lCTime == it->first ? 'c' : '.') << " ";
-			cout.width(15);
-			cout << strFields[5] << " ";    //Permissions
-			cout.width(15);
-			cout << strFields[7] << " ";    //UID
-			cout.width(15);
-			cout << strFields[8] << " ";    //GID
-			cout.width(15);
-			cout << strFields[3] << " ";    //INODE
-			if (iTrimData >= 0) {           //FILE
-				cout << string(strFields[1], 0, iTrimData);
+			cout << " ";
+
+			//cout.width(3);
+			//cout << strFields[TSK3_MACTIME_MD5];
+			//cout << " ";
+
+			cout.width(8);
+			cout << strFields[TSK3_MACTIME_SIZE];
+			cout << " ";
+
+			cout << (lMTime == it->first ? 'm' : '.') << (lATime == it->first ? 'a' : '.') << (lCTime == it->first ? 'c' : '.') << (lCRTime == it->first ? 'b' : '.');
+			cout << " ";
+
+			cout.width(12);
+			cout << strFields[TSK3_MACTIME_PERMS];
+			cout << " ";
+
+			cout.width(8);
+			cout << strFields[TSK3_MACTIME_UID];
+			cout << " ";
+
+			cout.width(8);
+			cout << strFields[TSK3_MACTIME_GID];
+			cout << " ";
+
+			cout.width(12);
+			cout << strFields[TSK3_MACTIME_INODE];
+			cout << " ";
+
+			if (iTrimData >= 0) {
+				cout << string(strFields[TSK3_MACTIME_NAME], 0, iTrimData);
 			} else {
-				cout << strFields[1];
+				cout << strFields[TSK3_MACTIME_NAME];
 			}
 			cout << "\n";
+
 		}	//if (bDelimited) {
 	}	//for(multimap<long, string*>::iterator it = dateToRecordMap.begin(); it != dateToRecordMap.end(); it++) {
 
