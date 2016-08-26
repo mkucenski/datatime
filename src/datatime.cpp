@@ -37,6 +37,7 @@ int main(int argc, const char** argv) {
 	
 	vector<string> filenameVector;
 	bool bDelimited = false;
+	bool bMactime = false;
 	char chDelim = '|';
 	char chQualifier = '"';
 	bool bAllFields = false;
@@ -53,15 +54,16 @@ int main(int argc, const char** argv) {
 	int iTrimData = -1;
 	
 	struct poptOption optionsTable[] = {
-		{"field-separator",     't',	POPT_ARG_STRING,	NULL,	10,	"Input body file field separator.  Defaults to '|'.",	"separator"},
+		{"field-separator",	't',	POPT_ARG_STRING,	NULL,	10,	"Input body file field separator.  Defaults to '|'.",	"separator"},
+		{"mactime",				'm',	POPT_ARG_NONE,		NULL,	15,	"Output in the SleuthKit's mactime format.", NULL},
 		{"delimited",			'd',	POPT_ARG_NONE,		NULL,	20,	"Output in comma-delimited format.",	NULL},
-		{"timezone", 			'z',	POPT_ARG_STRING,	NULL,	30,	"POSIX timezone string (e.g. 'EST-5EDT,M4.1.0,M10.1.0' or 'GMT-5') to be used when displaying data. Defaults to GMT.", "zone"},
+		{"timezone",			'z',	POPT_ARG_STRING,	NULL,	30,	"POSIX timezone string (e.g. 'EST-5EDT,M4.1.0,M10.1.0' or 'GMT-5') to be used when displaying data. Defaults to GMT.", "zone"},
 		{"allfields",			'a',	POPT_ARG_NONE,		NULL,	40,	"Display all data fields.  Useful when working with custom data sources. Only applicable in comma-delimited mode.", NULL},
 		{"qualifier",			'q',	POPT_ARG_STRING,	NULL,	50,	"Input field qualifier. Defaults to '\"'. (e.g. ...,field0,\"fie,ld1\",field2,...)", "character"},
-		{"trim-data",			0,		POPT_ARG_INT,		NULL,	60,	"Trim data field for easier viewing. Use caution when searching as your are trimming potentially relevent data. Not applicable in comma-delimited mode.", "characters"},
-		{"start-date",          0,		POPT_ARG_STRING,	NULL,	70, 	"Only display entries recorded after the specified date.", "yyyy-mm-dd"},
-		{"end-date", 			0,		POPT_ARG_STRING,	NULL,	80, 	"Only display entries recorded before the specified date.", "yyyy-mm-dd"},
-		{"version",	 			0,		POPT_ARG_NONE,		NULL,	100,	"Display version.", NULL},
+		{"trim-data",			 0,		POPT_ARG_INT,		NULL,	60,	"Trim data field for easier viewing. Use caution when searching as your are trimming potentially relevent data. Not applicable in comma-delimited mode.", "characters"},
+		{"start-date",			 0,		POPT_ARG_STRING,	NULL,	70, 	"Only display entries recorded after the specified date.", "yyyy-mm-dd"},
+		{"end-date", 			 0,		POPT_ARG_STRING,	NULL,	80, 	"Only display entries recorded before the specified date.", "yyyy-mm-dd"},
+		{"version",	 			 0,		POPT_ARG_NONE,		NULL,	100,	"Display version.", NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -79,6 +81,9 @@ int main(int argc, const char** argv) {
 		switch (iOption) {
 			case 10:
 				chDelim = poptGetOptArg(optCon)[0];
+				break;
+			case 15:
+				bMactime = true;
 				break;
 			case 20:
 				bDelimited = true;
