@@ -56,7 +56,7 @@ int main(int argc, const char** argv) {
 	
 	struct poptOption optionsTable[] = {
 		{"field-separator",	't',	POPT_ARG_STRING,	NULL,	10,	"Input body file field separator.  Defaults to '|'.",	"separator"},
-		{"mactime",				'm',	POPT_ARG_NONE,		NULL,	15,	"Output in the SleuthKit's mactime format.", NULL},
+		{"mactime",				'm',	POPT_ARG_NONE,		NULL,	15,	"BETA! Output in the SleuthKit's mactime format.", NULL},
 		{"delimited",			'd',	POPT_ARG_NONE,		NULL,	20,	"Output in comma-delimited format.",	NULL},
 		{"timezone",			'z',	POPT_ARG_STRING,	NULL,	30,	"POSIX timezone string (e.g. 'EST-5EDT,M4.1.0,M10.1.0' or 'GMT-5') to be used when displaying data. Defaults to GMT.", "zone"},
 		{"allfields",			'a',	POPT_ARG_NONE,		NULL,	40,	"Display all data fields.  Useful when working with custom data sources. Only applicable in comma-delimited mode.", NULL},
@@ -240,6 +240,7 @@ int main(int argc, const char** argv) {
 		it->second->getField(TSK3_MACTIME_INODE, &strFields[TSK3_MACTIME_INODE]);
 
 		if (bDelimited) {
+
 			cout 	<< (it->first >= 0 ? getDateTimeString(tzcalc.calculateLocalTime(posix_time::from_time_t(it->first))) : "Unknown") << ","
 					<< strFields[TSK3_MACTIME_MD5] << ","
 					<< strFields[TSK3_MACTIME_SIZE] << ","
@@ -250,7 +251,27 @@ int main(int argc, const char** argv) {
 					<< strFields[TSK3_MACTIME_INODE] << ","
 					<< strFields[TSK3_MACTIME_NAME]
 					<< "\n";
+
+		} else if (bMactime) {
+
+			//Sleuthkit TSK3.x body format
+			//0  |1        |2    |3     |4       |5       |6   |7    |8    |9    |10
+			//MD5|NAME     |INODE|PERMS |UID     |GID     |SIZE|ATIME|MTIME|CTIME|CRTIME
+		
+			cout 	<< it->second->getField(TSK3_MACTIME_MD5) << "|"
+					<<	it->second->getField(TSK3_MACTIME_NAME) << "|"
+					<< it->second->getField(TSK3_MACTIME_INODE) << "|"
+					<< it->second->getField(TSK3_MACTIME_PERMS) << "|"
+					<< it->second->getField(TSK3_MACTIME_UID) << "|"
+					<< it->second->getField(TSK3_MACTIME_GID) << "|"
+					<< it->second->getField(TSK3_MACTIME_SIZE) << "|"
+					<< it->second->getField(TSK3_MACTIME_ATIME) << "|"
+					<< it->second->getFieldAsLong(TSK3_MACTIME_MTIME) << "|"
+					<< it->second->getField(TSK3_MACTIME_CTIME) << "|"
+					<< it->second->getField(TSK3_MACTIME_CRTIME) << "\n";
+			
 		} else {
+
 			//TODO For non-delimited output, dynamically size rows based on maximum text width
 			DEBUG_INFO(PACKAGE << ": it->first time value = " << it->first);
 			//cout.fill('_');
