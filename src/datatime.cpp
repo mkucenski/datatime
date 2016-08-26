@@ -260,10 +260,6 @@ int main(int argc, const char** argv) {
 			}
 			cout << " ";
 
-			//cout.width(3);
-			//cout << strFields[TSK3_MACTIME_MD5];
-			//cout << " ";
-
 			cout.width(8);
 			cout << strFields[TSK3_MACTIME_SIZE];
 			cout << " ";
