@@ -56,7 +56,7 @@ int main(int argc, const char** argv) {
 	
 	struct poptOption optionsTable[] = {
 		{"field-separator",	't',	POPT_ARG_STRING,	NULL,	10,	"Input body file field separator.  Defaults to '|'.",	"separator"},
-		{"mactime",				'm',	POPT_ARG_NONE,		NULL,	15,	"BETA! Output in the SleuthKit's mactime format.", NULL},
+		{"mactime",				'm',	POPT_ARG_NONE,		NULL,	15,	"Output in the SleuthKit's mactime format.", NULL},
 		{"delimited",			'd',	POPT_ARG_NONE,		NULL,	20,	"Output in comma-delimited format.",	NULL},
 		{"timezone",			'z',	POPT_ARG_STRING,	NULL,	30,	"POSIX timezone string (e.g. 'EST-5EDT,M4.1.0,M10.1.0' or 'GMT-5') to be used when displaying data. Defaults to GMT.", "zone"},
 		{"allfields",			'a',	POPT_ARG_NONE,		NULL,	40,	"Display all data fields.  Useful when working with custom data sources. Only applicable in comma-delimited mode.", NULL},
@@ -115,7 +115,7 @@ int main(int argc, const char** argv) {
 				strTmp = poptGetOptArg(optCon);
 				if (strTmp.length() == 10) {
 					startDate = gregorian::from_string(strTmp);
-					DEBUG_INFO(PACKAGE << ": Start Date = " << startDate);
+					//DEBUG_INFO(PACKAGE << ": Start Date = " << startDate);
 				} else {
 					usage(optCon, "Invalid start date value", "e.g. yyyy-mm-dd");
 					exit(EXIT_FAILURE);
@@ -125,7 +125,7 @@ int main(int argc, const char** argv) {
 				strTmp = poptGetOptArg(optCon);
 				if (strTmp.length() == 10) {
 					endDate = gregorian::from_string(strTmp);
-					DEBUG_INFO(PACKAGE << ": End Date = " << endDate);
+					//DEBUG_INFO(PACKAGE << ": End Date = " << endDate);
 				} else {
 					usage(optCon, "Invalid end date value", "e.g., yyyy-mm-dd");
 					exit(EXIT_FAILURE);
@@ -159,7 +159,7 @@ int main(int argc, const char** argv) {
 	
     // For each filename, open a delimTextFile object and iterate through the rows.
 	for (vector<string>::iterator it = filenameVector.begin(); it != filenameVector.end(); it++) {
-		DEBUG_INFO(PACKAGE << ": Reading file: " << *it);
+		//DEBUG_INFO(PACKAGE << ": Reading file: " << *it);
 		delimTextFile delimFileObj(*it, chDelim, chQualifier);
 		
 		while (true) {
@@ -170,7 +170,7 @@ int main(int argc, const char** argv) {
 			
 			long lMTime, lATime, lCTime, lCRTime;
 			if (delimFileObj.getNextRow(pDelimRowObj)) {				
-				DEBUG_INFO(PACKAGE << ": Retrieved Row: " << pDelimRowObj->getField(TSK3_MACTIME_NAME));
+				//DEBUG_INFO(PACKAGE << ": Retrieved Row: " << pDelimRowObj->getField(TSK3_MACTIME_NAME));
 
 				lMTime = -1;
 				lATime = -1;
@@ -181,7 +181,7 @@ int main(int argc, const char** argv) {
 				pDelimRowObj->getFieldAsLong(TSK3_MACTIME_CTIME, &lCTime);
 				pDelimRowObj->getFieldAsLong(TSK3_MACTIME_CRTIME, &lCRTime);
 				
-				DEBUG_INFO(PACKAGE << ": Loading records, MTime = " << lMTime << ", ATime = " << lATime << ", CTime = " << lCTime << ", CRTime = " << lCRTime);
+				//DEBUG_INFO(PACKAGE << ": Loading records, MTime = " << lMTime << ", ATime = " << lATime << ", CTime = " << lCTime << ", CRTime = " << lCRTime);
 				if (lMTime == -1 && lATime == -1 && lCTime == -1 && lCRTime == -1) {	//If there are no valid dates, the row gets automatically added with -1
 					timeToRecordMap.insert(pair<long, delimTextRow*>(-1, pDelimRowObj));
 				} else {    //If there are valid dates, the row is subject to date range rules
@@ -215,8 +215,10 @@ int main(int argc, const char** argv) {
 		}	//while () {
 	}	//for (vector<string>::iterator it = filenameVector.begin(); it != filenameVector.end(); it++) {
 
-	cout << "Time Zone: \"" << tzcalc.getTimeZoneString() << "\"" << endl;		//Display the timezone so that the reader knows which zone was used for this output
-		
+	if (!bMactime) {
+		cout << "Time Zone: \"" << tzcalc.getTimeZoneString() << "\"" << endl;		//Display the timezone so that the reader knows which zone was used for this output
+	}
+
 	long lastTime = -1;
 	long lMTime, lATime, lCTime, lCRTime;
 	for(multimap<long, delimTextRow*>::iterator it = timeToRecordMap.begin(); it != timeToRecordMap.end(); it++) {
@@ -241,6 +243,7 @@ int main(int argc, const char** argv) {
 
 		if (bDelimited) {
 
+		
 			cout 	<< (it->first >= 0 ? getDateTimeString(tzcalc.calculateLocalTime(posix_time::from_time_t(it->first))) : "Unknown") << ","
 					<< strFields[TSK3_MACTIME_MD5] << ","
 					<< strFields[TSK3_MACTIME_SIZE] << ","
@@ -253,27 +256,29 @@ int main(int argc, const char** argv) {
 					<< "\n";
 
 		} else if (bMactime) {
+			DEBUG_INFO(PACKAGE << " [bMactime] it->first=" << it->first << " lATime=" << lATime << " lMTime=" << lMTime << " lCTime=" << lCTime << " lCRTime=" << lCRTime);
 
 			//Sleuthkit TSK3.x body format
 			//0  |1        |2    |3     |4       |5       |6   |7    |8    |9    |10
 			//MD5|NAME     |INODE|PERMS |UID     |GID     |SIZE|ATIME|MTIME|CTIME|CRTIME
 		
-			cout 	<< it->second->getField(TSK3_MACTIME_MD5) << "|"
-					<<	it->second->getField(TSK3_MACTIME_NAME) << "|"
-					<< it->second->getField(TSK3_MACTIME_INODE) << "|"
-					<< it->second->getField(TSK3_MACTIME_PERMS) << "|"
-					<< it->second->getField(TSK3_MACTIME_UID) << "|"
-					<< it->second->getField(TSK3_MACTIME_GID) << "|"
-					<< it->second->getField(TSK3_MACTIME_SIZE) << "|"
-					<< it->second->getField(TSK3_MACTIME_ATIME) << "|"
-					<< it->second->getFieldAsLong(TSK3_MACTIME_MTIME) << "|"
-					<< it->second->getField(TSK3_MACTIME_CTIME) << "|"
-					<< it->second->getField(TSK3_MACTIME_CRTIME) << "\n";
+			cout 	<< strFields[TSK3_MACTIME_MD5] << "|"
+					<<	strFields[TSK3_MACTIME_NAME] << "|"
+					<< strFields[TSK3_MACTIME_INODE] << "|"
+					<< strFields[TSK3_MACTIME_PERMS] << "|"
+					<< strFields[TSK3_MACTIME_UID] << "|"
+					<< strFields[TSK3_MACTIME_GID] << "|"
+					<< strFields[TSK3_MACTIME_SIZE] << "|";
+
+			cout 	<< (lATime == it->first ? it->second->getField(TSK3_MACTIME_ATIME) : "") << "|"
+					<< (lMTime == it->first ? it->second->getField(TSK3_MACTIME_MTIME) : "") << "|"
+					<< (lCTime == it->first ? it->second->getField(TSK3_MACTIME_CTIME) : "") << "|"
+					<< (lCRTime == it->first ? it->second->getField(TSK3_MACTIME_CRTIME) : "") << "\n";
 			
 		} else {
 
 			//TODO For non-delimited output, dynamically size rows based on maximum text width
-			DEBUG_INFO(PACKAGE << ": it->first time value = " << it->first);
+			//DEBUG_INFO(PACKAGE << ": it->first time value = " << it->first);
 			//cout.fill('_');
 
 			if (it->first != lastTime) {								//Date-Time
@@ -286,7 +291,7 @@ int main(int argc, const char** argv) {
 			}
 			cout << " ";
 
-			cout.width(8);
+			cout.width(10);
 			cout << strFields[TSK3_MACTIME_SIZE];
 			cout << " ";
 
