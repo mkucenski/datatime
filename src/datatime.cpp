@@ -40,7 +40,7 @@ int main(int argc, const char** argv) {
 	bool bDelimited = false;
 	bool bMactime = false;
 	char chDelim = '|';
-	char chQualifier = '"';
+	char chQualifier = '\0';
 	bool bAllFields = false;
 	gregorian::date startDate(gregorian::min_date_time);
 	gregorian::date endDate(gregorian::max_date_time);
@@ -60,7 +60,7 @@ int main(int argc, const char** argv) {
 		{"delimited",			'd',	POPT_ARG_NONE,		NULL,	20,	"Output in comma-delimited format.",	NULL},
 		{"timezone",			'z',	POPT_ARG_STRING,	NULL,	30,	"POSIX timezone string (e.g. 'EST-5EDT,M4.1.0,M10.1.0' or 'GMT-5') to be used when displaying data. Defaults to GMT.", "zone"},
 		{"allfields",			'a',	POPT_ARG_NONE,		NULL,	40,	"Display all data fields.  Useful when working with custom data sources. Only applicable in comma-delimited mode.", NULL},
-		{"qualifier",			'q',	POPT_ARG_STRING,	NULL,	50,	"Input field qualifier. Defaults to '\"'. (e.g. ...,field0,\"fie,ld1\",field2,...)", "character"},
+		//{"qualifier",			'q',	POPT_ARG_STRING,	NULL,	50,	"Input field qualifier. Defaults to '\"'. (e.g. ...,field0,\"fie,ld1\",field2,...)", "character"},
 		{"trim-data",			 0,		POPT_ARG_INT,		NULL,	60,	"Trim data field for easier viewing. Use caution when searching as your are trimming potentially relevent data. Not applicable in comma-delimited mode.", "characters"},
 		{"start-date",			 0,		POPT_ARG_STRING,	NULL,	70, 	"Only display entries recorded after the specified date.", "yyyy-mm-dd"},
 		{"end-date", 			 0,		POPT_ARG_STRING,	NULL,	80, 	"Only display entries recorded before the specified date.", "yyyy-mm-dd"},
@@ -115,7 +115,7 @@ int main(int argc, const char** argv) {
 				strTmp = poptGetOptArg(optCon);
 				if (strTmp.length() == 10) {
 					startDate = gregorian::from_string(strTmp);
-					//DEBUG_INFO(PACKAGE << ": Start Date = " << startDate);
+					DEBUG_INFO(PACKAGE << ": Start Date = " << startDate);
 				} else {
 					usage(optCon, "Invalid start date value", "e.g. yyyy-mm-dd");
 					exit(EXIT_FAILURE);
@@ -125,7 +125,7 @@ int main(int argc, const char** argv) {
 				strTmp = poptGetOptArg(optCon);
 				if (strTmp.length() == 10) {
 					endDate = gregorian::from_string(strTmp);
-					//DEBUG_INFO(PACKAGE << ": End Date = " << endDate);
+					DEBUG_INFO(PACKAGE << ": End Date = " << endDate);
 				} else {
 					usage(optCon, "Invalid end date value", "e.g., yyyy-mm-dd");
 					exit(EXIT_FAILURE);
@@ -159,7 +159,7 @@ int main(int argc, const char** argv) {
 	
     // For each filename, open a delimTextFile object and iterate through the rows.
 	for (vector<string>::iterator it = filenameVector.begin(); it != filenameVector.end(); it++) {
-		//DEBUG_INFO(PACKAGE << ": Reading file: " << *it);
+		DEBUG_INFO(PACKAGE << ": Reading file: " << *it);
 		delimTextFile delimFileObj(*it, chDelim, chQualifier);
 		
 		while (true) {
@@ -170,7 +170,7 @@ int main(int argc, const char** argv) {
 			
 			long lMTime, lATime, lCTime, lCRTime;
 			if (delimFileObj.getNextRow(pDelimRowObj)) {				
-				//DEBUG_INFO(PACKAGE << ": Retrieved Row: " << pDelimRowObj->getField(TSK3_MACTIME_NAME));
+				DEBUG_INFO(PACKAGE << ": Retrieved Row: " << pDelimRowObj->getField(TSK3_MACTIME_NAME));
 
 				lMTime = -1;
 				lATime = -1;
@@ -181,7 +181,7 @@ int main(int argc, const char** argv) {
 				pDelimRowObj->getFieldAsLong(TSK3_MACTIME_CTIME, &lCTime);
 				pDelimRowObj->getFieldAsLong(TSK3_MACTIME_CRTIME, &lCRTime);
 				
-				//DEBUG_INFO(PACKAGE << ": Loading records, MTime = " << lMTime << ", ATime = " << lATime << ", CTime = " << lCTime << ", CRTime = " << lCRTime);
+				DEBUG_INFO(PACKAGE << ": Loading records, MTime = " << lMTime << ", ATime = " << lATime << ", CTime = " << lCTime << ", CRTime = " << lCRTime);
 				if (lMTime == -1 && lATime == -1 && lCTime == -1 && lCRTime == -1) {	//If there are no valid dates, the row gets automatically added with -1
 					timeToRecordMap.insert(pair<long, delimTextRow*>(-1, pDelimRowObj));
 				} else {    //If there are valid dates, the row is subject to date range rules
@@ -278,7 +278,7 @@ int main(int argc, const char** argv) {
 		} else {
 
 			//TODO For non-delimited output, dynamically size rows based on maximum text width
-			//DEBUG_INFO(PACKAGE << ": it->first time value = " << it->first);
+			DEBUG_INFO(PACKAGE << ": it->first time value = " << it->first);
 			//cout.fill('_');
 
 			if (it->first != lastTime) {								//Date-Time
