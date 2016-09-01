@@ -37,6 +37,10 @@ Dependencies
 * [My libdelimText](https://github.com/mkucenski/libdelimText)
 * [My libtimeUtils](https://github.com/mkucenski/libtimeUtils)
 
+Bugs
+-----
+* The libdelimText library needs to better handle delimiters and qualifiers. Qualifiers were disabled for this project due to problems with how it worked. Unfortunately, firewall log records coming out of my fw2mactime application can include a '|' in the URL--this causes obvious errors in parsing the line for mactime compatible fields. 
+
 Notes
 -----
 ```

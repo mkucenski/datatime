@@ -60,7 +60,7 @@ int main(int argc, const char** argv) {
 		{"delimited",			'd',	POPT_ARG_NONE,		NULL,	20,	"Output in comma-delimited format.",	NULL},
 		{"timezone",			'z',	POPT_ARG_STRING,	NULL,	30,	"POSIX timezone string (e.g. 'EST-5EDT,M4.1.0,M10.1.0' or 'GMT-5') to be used when displaying data. Defaults to GMT.", "zone"},
 		{"allfields",			'a',	POPT_ARG_NONE,		NULL,	40,	"Display all data fields.  Useful when working with custom data sources. Only applicable in comma-delimited mode.", NULL},
-		//{"qualifier",			'q',	POPT_ARG_STRING,	NULL,	50,	"Input field qualifier. Defaults to '\"'. (e.g. ...,field0,\"fie,ld1\",field2,...)", "character"},
+		//TODO {"qualifier",			'q',	POPT_ARG_STRING,	NULL,	50,	"Input field qualifier. Defaults to '\"'. (e.g. ...,field0,\"fie,ld1\",field2,...)", "character"},
 		{"trim-data",			 0,		POPT_ARG_INT,		NULL,	60,	"Trim data field for easier viewing. Use caution when searching as your are trimming potentially relevent data. Not applicable in comma-delimited mode.", "characters"},
 		{"start-date",			 0,		POPT_ARG_STRING,	NULL,	70, 	"Only display entries recorded after the specified date.", "yyyy-mm-dd"},
 		{"end-date", 			 0,		POPT_ARG_STRING,	NULL,	80, 	"Only display entries recorded before the specified date.", "yyyy-mm-dd"},
