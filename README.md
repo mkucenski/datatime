@@ -41,6 +41,15 @@ Bugs
 -----
 * The libdelimText library needs to better handle delimiters and qualifiers. Qualifiers were disabled for this project due to problems with how it worked. Unfortunately, firewall log records coming out of my fw2mactime application can include a '|' in the URL--this causes obvious errors in parsing the line for mactime compatible fields. 
 
+Wishlist
+-----
+* Ability to filter by uid/gid (or SID)--let you find and visualize all files owned by a particular user/group.
+	** How can you make tsk_gettimes or fls export the uid/gid in the body file? tsk_gettimes doesn't seem to do it by default.
+* More complex selection of filters? Multiple date ranges, uid/gid, etc.?
+* Ability to filter by folder (i.e. if uid/SID unavailable; filter by user folder and their recycle bin).
+* Filtering based on known good files (i.e. NSRL)
+	** How to get hash values into this process? Preprocessing forensic image to link file to hash?
+
 Notes
 -----
 ```
