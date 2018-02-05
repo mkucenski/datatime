@@ -242,7 +242,6 @@ int main(int argc, const char** argv) {
 		it->second->getField(TSK3_MACTIME_INODE, &strFields[TSK3_MACTIME_INODE]);
 
 		if (bDelimited) {
-
 		
 			cout 	<< (it->first >= 0 ? getDateTimeString(tzcalc.calculateLocalTime(posix_time::from_time_t(it->first))) : "Unknown") << ","
 					<< strFields[TSK3_MACTIME_MD5] << ","
