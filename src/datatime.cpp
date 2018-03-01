@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//#define _DEBUG_ 1
+// #define _DEBUG_
+#include "misc/debugMsgs.h"
+#include "misc/errMsgs.h"
 
 #include <iostream>
 #include <popt.h>
@@ -21,15 +23,13 @@
 #include <map>
 using namespace std;
 
-#include "boost/date_time/posix_time/posix_time_types.hpp"
-#include "boost/date_time/gregorian/gregorian_types.hpp"
-#include "boost/lexical_cast.hpp"
-using namespace boost;
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/date_time/gregorian/gregorian_types.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "libdelimText/src/delimTextFile.h"
 #include "libtimeUtils/src/timeUtils.h"
 #include "libtimeUtils/src/timeZoneCalculator.h"
-#include "misc/debugMsgs.h"
 #include "misc/poptUtils.h"
 #include "misc/tsk_mactime.h"
 
@@ -42,8 +42,9 @@ int main(int argc, const char** argv) {
 	char chDelim = '|';
 	char chQualifier = '\0';
 	bool bAllFields = false;
-	gregorian::date startDate(gregorian::min_date_time);
-	gregorian::date endDate(gregorian::max_date_time);
+	boost::gregorian::date startDate(boost::gregorian::min_date_time);
+	boost::gregorian::date endDate(boost::gregorian::max_date_time);
+	string strLog;
 
     // The retrieved entries are entered into the multimap using the time value as the 'key'. The multimap is automatically sorted based on those values; output is therefore sorted in ascending time order.
 	multimap<long, delimTextRow*> timeToRecordMap;
@@ -61,10 +62,11 @@ int main(int argc, const char** argv) {
 		{"timezone",			'z',	POPT_ARG_STRING,	NULL,	30,	"POSIX timezone string (e.g. 'EST-5EDT,M4.1.0,M10.1.0' or 'GMT-5') to be used when displaying data. Defaults to GMT.", "zone"},
 		{"allfields",			'a',	POPT_ARG_NONE,		NULL,	40,	"Display all data fields.  Useful when working with custom data sources. Only applicable in comma-delimited mode.", NULL},
 		//TODO {"qualifier",			'q',	POPT_ARG_STRING,	NULL,	50,	"Input field qualifier. Defaults to '\"'. (e.g. ...,field0,\"fie,ld1\",field2,...)", "character"},
-		{"trim-data",			 0,		POPT_ARG_INT,		NULL,	60,	"Trim data field for easier viewing. Use caution when searching as your are trimming potentially relevent data. Not applicable in comma-delimited mode.", "characters"},
-		{"start-date",			 0,		POPT_ARG_STRING,	NULL,	70, 	"Only display entries recorded after the specified date.", "yyyy-mm-dd"},
-		{"end-date", 			 0,		POPT_ARG_STRING,	NULL,	80, 	"Only display entries recorded before the specified date.", "yyyy-mm-dd"},
-		{"version",	 			 0,		POPT_ARG_NONE,		NULL,	100,	"Display version.", NULL},
+		{"log",					'l',	POPT_ARG_STRING,	NULL,	55,	"Log errors/warnings to file.", "log"},
+		{"trim-data",			 0,	POPT_ARG_INT,		NULL,	60,	"Trim data field for easier viewing. Use caution when searching as your are trimming potentially relevent data. Not applicable in comma-delimited mode.", "characters"},
+		{"start-date",			 0,	POPT_ARG_STRING,	NULL,	70, 	"Only display entries recorded after the specified date.", "yyyy-mm-dd"},
+		{"end-date", 			 0,	POPT_ARG_STRING,	NULL,	80, 	"Only display entries recorded before the specified date.", "yyyy-mm-dd"},
+		{"version",	 			 0,	POPT_ARG_NONE,		NULL,	100,	"Display version.", NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
 	};
@@ -108,14 +110,22 @@ int main(int argc, const char** argv) {
 					exit(EXIT_FAILURE);
 				}
 				break;
+			case 55:
+				strLog = poptGetOptArg(optCon);
+				logOpen(strLog);
+				break;
 			case 60:
 				iTrimData = strtol(poptGetOptArg(optCon), NULL, 10);
 				break;
 			case 70:
 				strTmp = poptGetOptArg(optCon);
 				if (strTmp.length() == 10) {
-					startDate = gregorian::from_string(strTmp);
-					DEBUG_INFO(PACKAGE << ": Start Date = " << startDate);
+					try {
+						startDate = boost::gregorian::from_string(strTmp);
+					} catch (...) {
+						ERROR("main() --start-date Unknown exception");
+					}
+					DEBUG("Start Date = " << startDate);
 				} else {
 					usage(optCon, "Invalid start date value", "e.g. yyyy-mm-dd");
 					exit(EXIT_FAILURE);
@@ -124,8 +134,12 @@ int main(int argc, const char** argv) {
 			case 80:
 				strTmp = poptGetOptArg(optCon);
 				if (strTmp.length() == 10) {
-					endDate = gregorian::from_string(strTmp);
-					DEBUG_INFO(PACKAGE << ": End Date = " << endDate);
+					try {
+						endDate = boost::gregorian::from_string(strTmp);
+					} catch (...) {
+						ERROR("main() --end-date Unknown exception");
+					}
+					DEBUG("End Date = " << endDate);
 				} else {
 					usage(optCon, "Invalid end date value", "e.g., yyyy-mm-dd");
 					exit(EXIT_FAILURE);
@@ -139,7 +153,11 @@ int main(int argc, const char** argv) {
 		iOption = poptGetNextOpt(optCon);
 	}
 	
-	gregorian::date_period dateRange(startDate, endDate + gregorian::date_duration(1));	//Add an additional day to be inclusive of the given end date
+	// try {
+		boost::gregorian::date_period dateRange(startDate, endDate + boost::gregorian::date_duration(1));	//Add an additional day to be inclusive of the given end date
+	// } catch (...) {
+	// 	ERROR("main() dateRange Unknown exception");
+	// }
 
 	if (iOption != -1) {
 		usage(optCon, poptBadOption(optCon, POPT_BADOPTION_NOALIAS), poptStrerror(iOption));
@@ -159,7 +177,7 @@ int main(int argc, const char** argv) {
 	
     // For each filename, open a delimTextFile object and iterate through the rows.
 	for (vector<string>::iterator it = filenameVector.begin(); it != filenameVector.end(); it++) {
-		DEBUG_INFO(PACKAGE << ": Reading file: " << *it);
+		DEBUG("Reading file: " << *it);
 		delimTextFile delimFileObj(*it, chDelim, chQualifier);
 		
 		while (true) {
@@ -170,7 +188,7 @@ int main(int argc, const char** argv) {
 			
 			long lMTime, lATime, lCTime, lCRTime;
 			if (delimFileObj.getNextRow(pDelimRowObj)) {				
-				DEBUG_INFO(PACKAGE << ": Retrieved Row: " << pDelimRowObj->getField(TSK3_MACTIME_NAME));
+				DEBUG("Retrieved Row: " << pDelimRowObj->getField(TSK3_MACTIME_NAME));
 
 				lMTime = -1;
 				lATime = -1;
@@ -181,31 +199,47 @@ int main(int argc, const char** argv) {
 				pDelimRowObj->getFieldAsLong(TSK3_MACTIME_CTIME, &lCTime);
 				pDelimRowObj->getFieldAsLong(TSK3_MACTIME_CRTIME, &lCRTime);
 				
-				DEBUG_INFO(PACKAGE << ": Loading records, MTime = " << lMTime << ", ATime = " << lATime << ", CTime = " << lCTime << ", CRTime = " << lCRTime);
+				DEBUG("Loading records, MTime = " << lMTime << ", ATime = " << lATime << ", CTime = " << lCTime << ", CRTime = " << lCRTime);
 				if (lMTime == -1 && lATime == -1 && lCTime == -1 && lCRTime == -1) {	//If there are no valid dates, the row gets automatically added with -1
 					timeToRecordMap.insert(pair<long, delimTextRow*>(-1, pDelimRowObj));
 				} else {    //If there are valid dates, the row is subject to date range rules
 					if (lMTime >= 0) {
-						if (dateRange.contains(tzcalc.calculateLocalTime(posix_time::from_time_t(lMTime)).local_time().date())) {
-							timeToRecordMap.insert(pair<long, delimTextRow*>(lMTime, pDelimRowObj));
+						try {
+							if (dateRange.contains(tzcalc.calculateLocalTime(boost::posix_time::from_time_t(lMTime)).local_time().date())) {
+								timeToRecordMap.insert(pair<long, delimTextRow*>(lMTime, pDelimRowObj));
+							}
+						} catch (...) {
+							ERROR("main() lMTime Unknown exception (" << pDelimRowObj->getData() << ")");
 						}
 					}
 					
 					if (lATime >= 0 && lATime != lMTime) {  //Only add a row more than once if the various times are different from each other.
-						if (dateRange.contains(tzcalc.calculateLocalTime(posix_time::from_time_t(lATime)).local_time().date())) {
-							timeToRecordMap.insert(pair<long, delimTextRow*>(lATime, pDelimRowObj));
+						try {
+							if (dateRange.contains(tzcalc.calculateLocalTime(boost::posix_time::from_time_t(lATime)).local_time().date())) {
+								timeToRecordMap.insert(pair<long, delimTextRow*>(lATime, pDelimRowObj));
+							}
+						} catch (...) {
+							ERROR("main() lATime Unknown exception." << pDelimRowObj->getData() << ")");
 						}
 					}
 										
 					if (lCTime >= 0 && lCTime != lMTime && lCTime != lATime) {  //Only add a row more than once if the various times are different from each other.
-						if (dateRange.contains(tzcalc.calculateLocalTime(posix_time::from_time_t(lCTime)).local_time().date())) {
-							timeToRecordMap.insert(pair<long, delimTextRow*>(lCTime, pDelimRowObj));
+						try {
+							if (dateRange.contains(tzcalc.calculateLocalTime(boost::posix_time::from_time_t(lCTime)).local_time().date())) {
+								timeToRecordMap.insert(pair<long, delimTextRow*>(lCTime, pDelimRowObj));
+							}
+						} catch (...) {
+							ERROR("main() lCTime Unknown exception." << pDelimRowObj->getData() << ")");
 						}
 					}
 										
 					if (lCRTime >= 0 && lCRTime != lMTime && lCRTime != lATime && lCRTime != lCTime) {  //Only add a row more than once if the various times are different from each other.
-						if (dateRange.contains(tzcalc.calculateLocalTime(posix_time::from_time_t(lCRTime)).local_time().date())) {
-							timeToRecordMap.insert(pair<long, delimTextRow*>(lCRTime, pDelimRowObj));
+						try {
+							if (dateRange.contains(tzcalc.calculateLocalTime(boost::posix_time::from_time_t(lCRTime)).local_time().date())) {
+								timeToRecordMap.insert(pair<long, delimTextRow*>(lCRTime, pDelimRowObj));
+							}
+						} catch (...) {
+							ERROR("main() lCRTime Unknown exception." << pDelimRowObj->getData() << ")");
 						}
 					}
 				}
@@ -243,7 +277,8 @@ int main(int argc, const char** argv) {
 
 		if (bDelimited) {
 		
-			cout 	<< (it->first >= 0 ? getDateTimeString(tzcalc.calculateLocalTime(posix_time::from_time_t(it->first))) : "Unknown") << ","
+			try {
+			cout 	<< (it->first >= 0 ? getDateTimeString(tzcalc.calculateLocalTime(boost::posix_time::from_time_t(it->first))) : "Unknown") << ","
 					<< strFields[TSK3_MACTIME_MD5] << ","
 					<< strFields[TSK3_MACTIME_SIZE] << ","
 					<< (lMTime == it->first ? 'm' : '.') << (lATime == it->first ? 'a' : '.') << (lCTime == it->first ? 'c' : '.') << (lCRTime == it->first ? 'b' : '.') << ","
@@ -253,9 +288,12 @@ int main(int argc, const char** argv) {
 					<< strFields[TSK3_MACTIME_INODE] << ","
 					<< strFields[TSK3_MACTIME_NAME]
 					<< "\n";
+			} catch (...) {
+				ERROR("main() delimited Unknown exception");
+			}
 
 		} else if (bMactime) {
-			DEBUG_INFO(PACKAGE << " [bMactime] it->first=" << it->first << " lATime=" << lATime << " lMTime=" << lMTime << " lCTime=" << lCTime << " lCRTime=" << lCRTime);
+			DEBUG("[bMactime] it->first=" << it->first << " lATime=" << lATime << " lMTime=" << lMTime << " lCTime=" << lCTime << " lCRTime=" << lCRTime);
 
 			//Sleuthkit TSK3.x body format
 			//0  |1        |2    |3     |4       |5       |6   |7    |8    |9    |10
@@ -277,12 +315,16 @@ int main(int argc, const char** argv) {
 		} else {
 
 			//TODO For non-delimited output, dynamically size rows based on maximum text width
-			DEBUG_INFO(PACKAGE << ": it->first time value = " << it->first);
+			//DEBUG("it->first time value = " << it->first);
 			//cout.fill('_');
 
 			if (it->first != lastTime) {								//Date-Time
 				cout.width(24);
-				cout << (it->first >= 0 ? getDateTimeString(tzcalc.calculateLocalTime(posix_time::from_time_t(it->first))) : "Unknown Date/Time");
+				try {
+					cout << (it->first >= 0 ? getDateTimeString(tzcalc.calculateLocalTime(boost::posix_time::from_time_t(it->first))) : "Unknown Date/Time");
+				} catch (...) {
+					ERROR("main() formatted Unknown exception");
+				}
 				lastTime = it->first;
 			} else {    //Don't repeat the same date over and over
 				cout.width(24);
@@ -328,6 +370,10 @@ int main(int argc, const char** argv) {
 	//	delete *it;
 	//}
 	//allRows.clear();
+
+	if (strLog != "") {
+		logClose();
+	}
 
 	exit(rv);	
 }	//int main(int argc, const char** argv) {
