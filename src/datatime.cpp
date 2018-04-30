@@ -46,12 +46,20 @@ int main(int argc, const char** argv) {
 	boost::gregorian::date endDate(boost::gregorian::max_date_time);
 	string strLog;
 
-    // The retrieved entries are entered into the multimap using the time value as the 'key'. The multimap is automatically sorted based on those values; output is therefore sorted in ascending time order.
+	// The retrieved entries are entered into the multimap using the time value as the 'key'. The multimap is automatically 
+	// sorted based on those values; output is therefore sorted in ascending time order.  <multimap> was used over <map> 
+	// since it supports duplicate key (aka time) values; <map> must have unique keys.
+	//
+	// TODO		This data structure can grow too large for available memory and might need to be switched to an on-disk
+	// 			structure.  One possibility is STXXL using a <map> of time to values <set> (inc. all data matching that 
+	// 			time value). Note: STXXL does not have a multimap implementation, hence a <map> of key values to <set> data
+	//
+	// 			The alternative is to fix error handling such that it recovers better. Theoretically, if you were to process
+	// 			large MCT files by year (or month), it would use much less memory than trying to process all available data
+	// 			at once.
+	//
 	multimap<long, delimTextRow*> timeToRecordMap;
 
-    // TODO I don't recall why it would be necessary to load all of the rows into a vector and then delete them all at the end...
-    //vector<delimTextRow*> allRows;
-    
 	timeZoneCalculator tzcalc;
 	int iTrimData = -1;
 	
@@ -153,11 +161,7 @@ int main(int argc, const char** argv) {
 		iOption = poptGetNextOpt(optCon);
 	}
 	
-	// try {
-		boost::gregorian::date_period dateRange(startDate, endDate + boost::gregorian::date_duration(1));	//Add an additional day to be inclusive of the given end date
-	// } catch (...) {
-	// 	ERROR("main() dateRange Unknown exception");
-	// }
+	boost::gregorian::date_period dateRange(startDate, endDate + boost::gregorian::date_duration(1));	//Add an additional day to be inclusive of the given end date
 
 	if (iOption != -1) {
 		usage(optCon, poptBadOption(optCon, POPT_BADOPTION_NOALIAS), poptStrerror(iOption));
@@ -183,12 +187,8 @@ int main(int argc, const char** argv) {
 		while (true) {
 			delimTextRow* pDelimRowObj = new delimTextRow;
 
-			// TODO - Is this necessary?
-			//allRows.push_back(pDelimRowObj);
-			
 			long lMTime, lATime, lCTime, lCRTime;
 			if (delimFileObj.getNextRow(pDelimRowObj)) {				
-				DEBUG("Retrieved Row: " << pDelimRowObj->getField(TSK3_MACTIME_NAME));
 
 				lMTime = -1;
 				lATime = -1;
@@ -199,50 +199,40 @@ int main(int argc, const char** argv) {
 				pDelimRowObj->getFieldAsLong(TSK3_MACTIME_CTIME, &lCTime);
 				pDelimRowObj->getFieldAsLong(TSK3_MACTIME_CRTIME, &lCRTime);
 				
-				DEBUG("Loading records, MTime = " << lMTime << ", ATime = " << lATime << ", CTime = " << lCTime << ", CRTime = " << lCRTime);
-				if (lMTime == -1 && lATime == -1 && lCTime == -1 && lCRTime == -1) {	//If there are no valid dates, the row gets automatically added with -1
-					timeToRecordMap.insert(pair<long, delimTextRow*>(-1, pDelimRowObj));
-				} else {    //If there are valid dates, the row is subject to date range rules
-					if (lMTime >= 0) {
-						try {
+				try {
+					DEBUG("Retrieved row: MTime=" << lMTime << ", ATime=" << lATime << ", CTime=" << lCTime << ", CRTime=" << lCRTime << " (" << pDelimRowObj->getField(TSK3_MACTIME_NAME) << ")");
+					if (lMTime == -1 && lATime == -1 && lCTime == -1 && lCRTime == -1) {	//If there are no valid dates, the row gets automatically added with -1
+						timeToRecordMap.insert(pair<long, delimTextRow*>(-1, pDelimRowObj));
+					} else {    //If there are valid dates, the row is subject to date range rules
+						if (lMTime >= 0) {
 							if (dateRange.contains(tzcalc.calculateLocalTime(boost::posix_time::from_time_t(lMTime)).local_time().date())) {
 								timeToRecordMap.insert(pair<long, delimTextRow*>(lMTime, pDelimRowObj));
 							}
-						} catch (...) {
-							ERROR("main() lMTime Unknown exception (" << pDelimRowObj->getData() << ")");
 						}
-					}
-					
-					if (lATime >= 0 && lATime != lMTime) {  //Only add a row more than once if the various times are different from each other.
-						try {
+						
+						if (lATime >= 0 && lATime != lMTime) {  //Only add a row more than once if the various times are different from each other.
 							if (dateRange.contains(tzcalc.calculateLocalTime(boost::posix_time::from_time_t(lATime)).local_time().date())) {
 								timeToRecordMap.insert(pair<long, delimTextRow*>(lATime, pDelimRowObj));
 							}
-						} catch (...) {
-							ERROR("main() lATime Unknown exception." << pDelimRowObj->getData() << ")");
 						}
-					}
-										
-					if (lCTime >= 0 && lCTime != lMTime && lCTime != lATime) {  //Only add a row more than once if the various times are different from each other.
-						try {
+											
+						if (lCTime >= 0 && lCTime != lMTime && lCTime != lATime) {  //Only add a row more than once if the various times are different from each other.
 							if (dateRange.contains(tzcalc.calculateLocalTime(boost::posix_time::from_time_t(lCTime)).local_time().date())) {
 								timeToRecordMap.insert(pair<long, delimTextRow*>(lCTime, pDelimRowObj));
 							}
-						} catch (...) {
-							ERROR("main() lCTime Unknown exception." << pDelimRowObj->getData() << ")");
 						}
-					}
 										
-					if (lCRTime >= 0 && lCRTime != lMTime && lCRTime != lATime && lCRTime != lCTime) {  //Only add a row more than once if the various times are different from each other.
-						try {
+						if (lCRTime >= 0 && lCRTime != lMTime && lCRTime != lATime && lCRTime != lCTime) {  //Only add a row more than once if the various times are different from each other.
 							if (dateRange.contains(tzcalc.calculateLocalTime(boost::posix_time::from_time_t(lCRTime)).local_time().date())) {
 								timeToRecordMap.insert(pair<long, delimTextRow*>(lCRTime, pDelimRowObj));
 							}
-						} catch (...) {
-							ERROR("main() lCRTime Unknown exception." << pDelimRowObj->getData() << ")");
 						}
 					}
-				}
+				} catch (bad_alloc) {
+					ERROR("main() Multimap insert bad_alloc exception: size=" << timeToRecordMap.size() << ", max_size=" << timeToRecordMap.max_size() << " (" << pDelimRowObj->getData() << ")");
+				} catch (...) {
+					ERROR("main() Multimap insert unknown exception (" << pDelimRowObj->getData() << ")");
+				} //try {
 			} else {
 				break;
 			}
@@ -364,12 +354,6 @@ int main(int argc, const char** argv) {
 
 		}	//if (bDelimited) {
 	}	//for(multimap<long, string*>::iterator it = dateToRecordMap.begin(); it != dateToRecordMap.end(); it++) {
-
-    // TODO - ?
-	//for(vector<delimTextRow*>::iterator it = allRows.begin(); it != allRows.end(); it++) {
-	//	delete *it;
-	//}
-	//allRows.clear();
 
 	if (strLog != "") {
 		logClose();
