@@ -44,6 +44,10 @@ int main(int argc, const char** argv) {
 	bool bAllFields = false;
 	boost::gregorian::date startDate(boost::gregorian::min_date_time);
 	boost::gregorian::date endDate(boost::gregorian::max_date_time);
+	bool bIncludeModified = true;
+	bool bIncludeAccessed = true;
+	bool bIncludeChanged = true;
+	bool bIncludeBirthed = true;
 	string strLog;
 
     // The retrieved entries are entered into the multimap using the time value as the 'key'. The multimap is automatically sorted based on those values; output is therefore sorted in ascending time order.
@@ -66,6 +70,10 @@ int main(int argc, const char** argv) {
 		{"trim-data",			 0,	POPT_ARG_INT,		NULL,	60,	"Trim data field for easier viewing. Use caution when searching as your are trimming potentially relevent data. Not applicable in comma-delimited mode.", "characters"},
 		{"start-date",			 0,	POPT_ARG_STRING,	NULL,	70, 	"Only display entries recorded after the specified date.", "yyyy-mm-dd"},
 		{"end-date", 			 0,	POPT_ARG_STRING,	NULL,	80, 	"Only display entries recorded before the specified date.", "yyyy-mm-dd"},
+		{"skip-modified-time",0,	POPT_ARG_NONE,		NULL,	90, 	"Do not include modified times in the output.", NULL},
+		{"skip-accessed-time",0,	POPT_ARG_NONE,		NULL,	91, 	"Do not include accessed times in the output.", NULL},
+		{"skip-changed-time", 0,	POPT_ARG_NONE,		NULL,	92, 	"Do not include changed times in the output.", NULL},
+		{"skip-birthed-time", 0,	POPT_ARG_NONE,		NULL,	93, 	"Do not include birthed times in the output.", NULL},
 		{"version",	 			 0,	POPT_ARG_NONE,		NULL,	100,	"Display version.", NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
@@ -145,6 +153,18 @@ int main(int argc, const char** argv) {
 					exit(EXIT_FAILURE);
 				}
 				break;
+			case 90:
+				bIncludeModified = false;
+				break;
+			case 91:
+				bIncludeAccessed = false;
+				break;
+			case 92:
+				bIncludeChanged = false;
+				break;
+			case 93:
+				bIncludeBirthed = false;
+				break;
 			case 100:
 				version(PACKAGE, VERSION);
 				exit(EXIT_SUCCESS);
@@ -194,10 +214,18 @@ int main(int argc, const char** argv) {
 				lATime = -1;
 				lCTime = -1;
 				lCRTime = -1;
-				pDelimRowObj->getFieldAsLong(TSK3_MACTIME_MTIME, &lMTime);
-				pDelimRowObj->getFieldAsLong(TSK3_MACTIME_ATIME, &lATime);
-				pDelimRowObj->getFieldAsLong(TSK3_MACTIME_CTIME, &lCTime);
-				pDelimRowObj->getFieldAsLong(TSK3_MACTIME_CRTIME, &lCRTime);
+				if (bIncludeModified) {
+					pDelimRowObj->getFieldAsLong(TSK3_MACTIME_MTIME, &lMTime);
+				}
+				if (bIncludeAccessed) {
+					pDelimRowObj->getFieldAsLong(TSK3_MACTIME_ATIME, &lATime);
+				}
+				if (bIncludeChanged) {
+					pDelimRowObj->getFieldAsLong(TSK3_MACTIME_CTIME, &lCTime);
+				}
+				if (bIncludeBirthed) {
+					pDelimRowObj->getFieldAsLong(TSK3_MACTIME_CRTIME, &lCRTime);
+				}
 				
 				DEBUG("Loading records, MTime = " << lMTime << ", ATime = " << lATime << ", CTime = " << lCTime << ", CRTime = " << lCRTime);
 				if (lMTime == -1 && lATime == -1 && lCTime == -1 && lCRTime == -1) {	//If there are no valid dates, the row gets automatically added with -1
@@ -261,10 +289,18 @@ int main(int argc, const char** argv) {
 		lCTime = -1;
 		lCRTime = -1;
 
-		it->second->getFieldAsLong(TSK3_MACTIME_MTIME, &lMTime);
-		it->second->getFieldAsLong(TSK3_MACTIME_ATIME, &lATime);
-		it->second->getFieldAsLong(TSK3_MACTIME_CTIME, &lCTime);
-		it->second->getFieldAsLong(TSK3_MACTIME_CRTIME, &lCRTime);
+		if (bIncludeModified) {
+			it->second->getFieldAsLong(TSK3_MACTIME_MTIME, &lMTime);
+		}
+		if (bIncludeAccessed) {
+			it->second->getFieldAsLong(TSK3_MACTIME_ATIME, &lATime);
+		}
+		if (bIncludeChanged) {
+			it->second->getFieldAsLong(TSK3_MACTIME_CTIME, &lCTime);
+		}
+		if (bIncludeBirthed) {
+			it->second->getFieldAsLong(TSK3_MACTIME_CRTIME, &lCRTime);
+		}
 		
 		string strFields[11];
 		it->second->getField(TSK3_MACTIME_NAME, &strFields[TSK3_MACTIME_NAME]);
