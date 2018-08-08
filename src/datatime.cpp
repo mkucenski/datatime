@@ -44,10 +44,13 @@ int main(int argc, const char** argv) {
 	bool bAllFields = false;
 	boost::gregorian::date startDate(boost::gregorian::min_date_time);
 	boost::gregorian::date endDate(boost::gregorian::max_date_time);
-	bool bIncludeModified = true;
-	bool bIncludeAccessed = true;
-	bool bIncludeChanged = true;
-	bool bIncludeBirthed = true;
+
+	bool bRestrictTimeVals = false;
+	bool bIncludeModified = false;
+	bool bIncludeAccessed = false;
+	bool bIncludeChanged = false;
+	bool bIncludeBirthed = false;
+
 	string strLog;
 
 	// The retrieved entries are entered into the multimap using the time value as the 'key'. The multimap is automatically 
@@ -78,10 +81,10 @@ int main(int argc, const char** argv) {
 		{"trim-data",			 0,	POPT_ARG_INT,		NULL,	60,	"Trim data field for easier viewing. Use caution when searching as your are trimming potentially relevent data. Not applicable in comma-delimited mode.", "characters"},
 		{"start-date",			 0,	POPT_ARG_STRING,	NULL,	70, 	"Only display entries recorded after the specified date.", "yyyy-mm-dd"},
 		{"end-date", 			 0,	POPT_ARG_STRING,	NULL,	80, 	"Only display entries recorded before the specified date.", "yyyy-mm-dd"},
-		{"skip-modified-time",0,	POPT_ARG_NONE,		NULL,	90, 	"Do not include modified times in the output.", NULL},
-		{"skip-accessed-time",0,	POPT_ARG_NONE,		NULL,	91, 	"Do not include accessed times in the output.", NULL},
-		{"skip-changed-time", 0,	POPT_ARG_NONE,		NULL,	92, 	"Do not include changed times in the output.", NULL},
-		{"skip-birthed-time", 0,	POPT_ARG_NONE,		NULL,	93, 	"Do not include birthed times in the output.", NULL},
+		{"modified-time",     0,	POPT_ARG_NONE,		NULL,	90, 	"Only include modified times (and any other times explicitly specified) in the output.", NULL},
+		{"accessed-time",     0,	POPT_ARG_NONE,		NULL,	91, 	"Only include accessed times (and any other times explicitly specified) in the output.", NULL},
+		{"changed-time",      0,	POPT_ARG_NONE,		NULL,	92, 	"Only include changed times (and any other times explicitly specified) in the output.", NULL},
+		{"birthed-time",      0,	POPT_ARG_NONE,		NULL,	93, 	"Only include birthed times (and any other times explicitly specified) in the output.", NULL},
 		{"version",	 			 0,	POPT_ARG_NONE,		NULL,	100,	"Display version.", NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
@@ -162,16 +165,20 @@ int main(int argc, const char** argv) {
 				}
 				break;
 			case 90:
-				bIncludeModified = false;
+				bRestrictTimeVals = true;
+				bIncludeModified = true;
 				break;
 			case 91:
-				bIncludeAccessed = false;
+				bRestrictTimeVals = true;
+				bIncludeAccessed = true;
 				break;
 			case 92:
-				bIncludeChanged = false;
+				bRestrictTimeVals = true;
+				bIncludeChanged = true;
 				break;
 			case 93:
-				bIncludeBirthed = false;
+				bRestrictTimeVals = true;
+				bIncludeBirthed = true;
 				break;
 			case 100:
 				version(PACKAGE, VERSION);
@@ -179,6 +186,13 @@ int main(int argc, const char** argv) {
 				break;
 		}
 		iOption = poptGetNextOpt(optCon);
+	}
+
+	if (!bRestrictTimeVals) {
+		bIncludeModified = true;
+		bIncludeAccessed = true;
+		bIncludeChanged = true;
+		bIncludeBirthed = true;
 	}
 	
 	boost::gregorian::date_period dateRange(startDate, endDate + boost::gregorian::date_duration(1));	//Add an additional day to be inclusive of the given end date
