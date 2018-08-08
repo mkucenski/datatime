@@ -81,10 +81,10 @@ int main(int argc, const char** argv) {
 		{"trim-data",			 0,	POPT_ARG_INT,		NULL,	60,	"Trim data field for easier viewing. Use caution when searching as your are trimming potentially relevent data. Not applicable in comma-delimited mode.", "characters"},
 		{"start-date",			 0,	POPT_ARG_STRING,	NULL,	70, 	"Only display entries recorded after the specified date.", "yyyy-mm-dd"},
 		{"end-date", 			 0,	POPT_ARG_STRING,	NULL,	80, 	"Only display entries recorded before the specified date.", "yyyy-mm-dd"},
-		{"modified-time",     0,	POPT_ARG_NONE,		NULL,	90, 	"Only include modified times (and any other times explicitly specified) in the output.", NULL},
-		{"accessed-time",     0,	POPT_ARG_NONE,		NULL,	91, 	"Only include accessed times (and any other times explicitly specified) in the output.", NULL},
-		{"changed-time",      0,	POPT_ARG_NONE,		NULL,	92, 	"Only include changed times (and any other times explicitly specified) in the output.", NULL},
-		{"birthed-time",      0,	POPT_ARG_NONE,		NULL,	93, 	"Only include birthed times (and any other times explicitly specified) in the output.", NULL},
+		{"modified",			 0,	POPT_ARG_NONE,		NULL,	90, 	"Only include modified times (and any other times explicitly specified) in the output.", NULL},
+		{"accessed",			 0,	POPT_ARG_NONE,		NULL,	91, 	"Only include accessed times (and any other times explicitly specified) in the output.", NULL},
+		{"changed",				 0,	POPT_ARG_NONE,		NULL,	92, 	"Only include changed times (and any other times explicitly specified) in the output.", NULL},
+		{"birthed",				 0,	POPT_ARG_NONE,		NULL,	93, 	"Only include birthed times (and any other times explicitly specified) in the output.", NULL},
 		{"version",	 			 0,	POPT_ARG_NONE,		NULL,	100,	"Display version.", NULL},
 		POPT_AUTOHELP
 		POPT_TABLEEND
