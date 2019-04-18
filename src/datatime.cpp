@@ -51,6 +51,9 @@ int main(int argc, const char** argv) {
 	bool bIncludeChanged = false;
 	bool bIncludeBirthed = false;
 
+	bool bHideSize = false;
+	bool bHideTime = false;
+
 	string strLog;
 
 	// The retrieved entries are entered into the multimap using the time value as the 'key'. The multimap is automatically 
@@ -79,6 +82,8 @@ int main(int argc, const char** argv) {
 		//TODO {"qualifier",			'q',	POPT_ARG_STRING,	NULL,	50,	"Input field qualifier. Defaults to '\"'. (e.g. ...,field0,\"fie,ld1\",field2,...)", "character"},
 		{"log",					'l',	POPT_ARG_STRING,	NULL,	55,	"Log errors/warnings to file.", "log"},
 		{"trim-data",			 0,	POPT_ARG_INT,		NULL,	60,	"Trim data field for easier viewing. Use caution when searching as your are trimming potentially relevent data. Not applicable in comma-delimited mode.", "characters"},
+		{"hide-size",			 0,	POPT_ARG_NONE,		NULL, 61,	"Do not display size field", NULL},
+		{"hide-time",			 0,	POPT_ARG_NONE,		NULL, 62,	"Do not diplay time, only the date.", NULL},
 		{"start-date",			 0,	POPT_ARG_STRING,	NULL,	70, 	"Only display entries recorded after the specified date.", "yyyy-mm-dd"},
 		{"end-date", 			 0,	POPT_ARG_STRING,	NULL,	80, 	"Only display entries recorded before the specified date.", "yyyy-mm-dd"},
 		{"modified",			 0,	POPT_ARG_NONE,		NULL,	90, 	"Only include modified times (and any other times explicitly specified) in the output.", NULL},
@@ -135,6 +140,12 @@ int main(int argc, const char** argv) {
 				break;
 			case 60:
 				iTrimData = strtol(poptGetOptArg(optCon), NULL, 10);
+				break;
+			case 61:
+				bHideSize = true;
+				break;
+			case 62:
+				bHideTime = true;
 				break;
 			case 70:
 				strTmp = poptGetOptArg(optCon);
@@ -318,16 +329,26 @@ int main(int argc, const char** argv) {
 		if (bDelimited) {
 		
 			try {
-			cout 	<< (it->first >= 0 ? getDateTimeString(tzcalc.calculateLocalTime(boost::posix_time::from_time_t(it->first))) : "Unknown") << ","
-					<< strFields[TSK3_MACTIME_MD5] << ","
-					<< strFields[TSK3_MACTIME_SIZE] << ","
-					<< (lMTime == it->first ? 'm' : '.') << (lATime == it->first ? 'a' : '.') << (lCTime == it->first ? 'c' : '.') << (lCRTime == it->first ? 'b' : '.') << ","
-					<< strFields[TSK3_MACTIME_PERMS] << ","
-					<< strFields[TSK3_MACTIME_UID] << ","
-					<< strFields[TSK3_MACTIME_GID] << ","
-					<< strFields[TSK3_MACTIME_INODE] << ","
-					<< strFields[TSK3_MACTIME_NAME]
-					<< "\n";
+
+				if (bHideTime) {
+					cout 	<< (it->first >= 0 ? getDateString(tzcalc.calculateLocalTime(boost::posix_time::from_time_t(it->first))) : "Unknown") << ",";
+				} else {
+					cout 	<< (it->first >= 0 ? getDateTimeString(tzcalc.calculateLocalTime(boost::posix_time::from_time_t(it->first))) : "Unknown") << ",";
+				}
+
+				cout	<< strFields[TSK3_MACTIME_MD5] << ",";
+
+				if (!bHideSize) {
+					cout << strFields[TSK3_MACTIME_SIZE] << ",";
+				}
+
+				cout	<< (lMTime == it->first ? 'm' : '.') << (lATime == it->first ? 'a' : '.') << (lCTime == it->first ? 'c' : '.') << (lCRTime == it->first ? 'b' : '.') << ","
+						<< strFields[TSK3_MACTIME_PERMS] << ","
+						<< strFields[TSK3_MACTIME_UID] << ","
+						<< strFields[TSK3_MACTIME_GID] << ","
+						<< strFields[TSK3_MACTIME_INODE] << ","
+						<< strFields[TSK3_MACTIME_NAME]
+						<< "\n";
 			} catch (...) {
 				ERROR("main() delimited Unknown exception");
 			}
@@ -359,22 +380,28 @@ int main(int argc, const char** argv) {
 			//cout.fill('_');
 
 			if (it->first != lastTime) {								//Date-Time
-				cout.width(24);
+				cout.width((bHideTime ? 15 : 24));
 				try {
-					cout << (it->first >= 0 ? getDateTimeString(tzcalc.calculateLocalTime(boost::posix_time::from_time_t(it->first))) : "Unknown Date/Time");
+					if (bHideTime) {
+						cout << (it->first >= 0 ? getDateStringAlt(tzcalc.calculateLocalTime(boost::posix_time::from_time_t(it->first))) : "Unknown Date");
+					} else {
+						cout << (it->first >= 0 ? getDateTimeStringAlt(tzcalc.calculateLocalTime(boost::posix_time::from_time_t(it->first))) : "Unknown Date/Time");
+					}
 				} catch (...) {
 					ERROR("main() formatted Unknown exception");
 				}
 				lastTime = it->first;
 			} else {    //Don't repeat the same date over and over
-				cout.width(24);
+				cout.width((bHideTime ? 15 : 24));
 				cout << "";
 			}
 			cout << " ";
 
-			cout.width(10);
-			cout << strFields[TSK3_MACTIME_SIZE];
-			cout << " ";
+			if (!bHideSize) {
+				cout.width(10);
+				cout << strFields[TSK3_MACTIME_SIZE];
+				cout << " ";
+			}
 
 			cout << (lMTime == it->first ? 'm' : '.') << (lATime == it->first ? 'a' : '.') << (lCTime == it->first ? 'c' : '.') << (lCRTime == it->first ? 'b' : '.');
 			cout << " ";
@@ -383,15 +410,15 @@ int main(int argc, const char** argv) {
 			cout << strFields[TSK3_MACTIME_PERMS];
 			cout << " ";
 
-			cout.width(8);
+			cout.width(33);
 			cout << strFields[TSK3_MACTIME_UID];
 			cout << " ";
 
-			cout.width(8);
+			cout.width(33);
 			cout << strFields[TSK3_MACTIME_GID];
 			cout << " ";
 
-			cout.width(12);
+			cout.width(20);
 			cout << strFields[TSK3_MACTIME_INODE];
 			cout << " ";
 
